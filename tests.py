@@ -14,9 +14,9 @@ try:
             
             PROCEDURE p1 (a, b : INTEGER);
             BEGIN
-                s := "something";
-                y := 222;
-                c := a + b;
+                s = "something";
+                y = 222;
+                c = a + b;
                 print(c);
                 print("print" + " " + s, "really", "interesting");
             END;
@@ -28,17 +28,17 @@ try:
             
             BEGIN {Part10}
                BEGIN
-                  number := 2;
-                  a := number;
-                  b := 10 * a + 10 * number DIV 4;
-                  c := a - - b;
+                  number = 2;
+                  a = number;
+                  b = 10 * a + 10 * number DIV 4;
+                  c = a - - b;
                   p1 (1 + 2, 3);
                END;
                               
                p2();
                
-               x := 11;               
-               y := 20 / 7 + 3.14;
+               x = 11;               
+               y = 20 / 7 + 3.14;
                
                p2();
                

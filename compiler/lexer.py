@@ -178,9 +178,8 @@ class Lexer:
             self.advance()
             self.current_token = Token(SEMI, SEMI)
             return self.current_token
-        elif cur_char == ":" and self.peek() == "=":
+        elif cur_char == "=":
             # ASSIGNMENT
-            self.advance()
             self.advance()
             self.current_token = Token(ASSIGN, ASSIGN)
             return self.current_token

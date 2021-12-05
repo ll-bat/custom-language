@@ -103,20 +103,20 @@ class Interpreter(NodeVisitor, NestedScopeable):
     def visit_VarSymbol(self, node: VarSymbol):
         self.symbol_table.define(node)
 
-    def visit_ProcedureDecl(self, node: ProcedureDecl):
+    def visit_FunctionDecl(self, node: FunctionDecl):
         self.symbol_table.define(node)
 
-    def visit_ProcedureCall(self, node: ProcedureCall):
+    def visit_FunctionCall(self, node: FunctionCall):
         if self.symbol_table.is_defined(node.name) is False:
             # system function call
             if is_system_function(node.name):
                 params = [self.visit(param) for param in node.actual_params]
                 return call_system_function(node.name, *params)
             else:
-                raise NameError("no such procedure: " + node.name)
+                raise NameError("no such function: " + node.name)
 
-        procedure: ProcedureDecl = self.symbol_table.lookup(node.name)
-        parameter_names: List[Symbol] = procedure.params
+        function: FunctionDecl = self.symbol_table.lookup(node.name)
+        parameter_names: List[Symbol] = function.params
         parameter_values = node.actual_params
         params = {}
         for var, val in zip(parameter_names, parameter_values):
@@ -126,7 +126,7 @@ class Interpreter(NodeVisitor, NestedScopeable):
         for param, item in params.items():
             self.symbol_table.define(Symbol(param, item))
 
-        block = procedure.block
+        block = function.block
         self.visit(block)
         self.destroy_current_scope()
 

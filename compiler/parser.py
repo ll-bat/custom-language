@@ -7,17 +7,20 @@ from utils.errors import ParserError, ErrorCode
 class Parser:
     """
     --------- GRAMMAR ---------------
-    program: PROGRAM variable SEMI block DOT
-    block: declarations compound_statement
-    declarations: VAR (variable_declaration SEMI)+ | PROCEDURE ID (LPARENT formal_parameter_list RPARENT)? SEMI block SEMI | empty
+    program: PROGRAM variable block
+    block:  LCBRACE declarations compound_statement RCBRACE
+    declarations:
+        VAR (variable_declaration SEMI)+
+        | FUNCTION ID (LPARENT formal_parameter_list RPARENT)? block
+        | empty
     formal_parameter_list: formal_parameter (SEMI format_parameter)*
     format_parameter: ID (COMMA ID)* COLON integer_type
     variable_declaration: ID (COMMA, ID)* COLON base_type
     base_type: INTEGER | REAL | STRING
-    compound_statement: BEGIN statement_list END
+    compound_statement: statement_list
     statement_list: statement (SEMI statement)*
-    statement: assignment_statement | procedure_call | compound_statement | empty
-    procedure_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT SEMI
+    statement: assignment_statement | function_call | empty
+    function_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT SEMI
     empty:
     assignment_statement: variable ASSIGN base_expr
     base_expr: (expr|str_expr)
@@ -31,17 +34,26 @@ class Parser:
     def __init__(self, text):
         self.lexer = Lexer(text)
 
+    def print_surrounding_tokens(self):
+        print("surrounding tokens")
+        print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+        for i in range(5):
+            if self.lexer.get_current_token().type is not EOF:
+                print(self.lexer.get_current_token())
+                self.lexer.go_forward()
+        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
+
     def program(self):
         self.match(PROGRAM)
         self.variable()
-        self.match(SEMI)
         block = self.block()
-        self.match(DOT)
         return Program(block)
 
     def block(self):
+        self.match(LCBRACE)
         declarations = self.declarations()
         compound_statement = self.compound_statement()
+        self.match(RCBRACE)
         return Block(declarations, compound_statement)
 
     def declarations(self) -> list:
@@ -52,8 +64,8 @@ class Parser:
                 declarations.append(self.variable_declaration())
                 self.match(SEMI)
 
-        while self.lexer.get_current_token().type is PROCEDURE:
-            self.match(PROCEDURE)
+        while self.lexer.get_current_token().type is FUNCTION:
+            self.match(FUNCTION)
             proc_name = self.lexer.get_current_token().value
             self.match(ID)
 
@@ -63,21 +75,22 @@ class Parser:
                 parameters_list = self.parameters_list()
                 self.match(RPARENT)
 
-            self.match(SEMI)
             block = self.block()
-            self.match(SEMI)
 
-            procedure_decl = ProcedureDecl(proc_name, parameters_list, block)
-            declarations.append(procedure_decl)
+            function_decl = FunctionDecl(proc_name, parameters_list, block)
+            declarations.append(function_decl)
 
         return declarations
 
     def parameters_list(self) -> list:
         """
-        ( a , b : INTEGER; c : REAL )
+        ( a , b : INTEGER; c : REAL ) or ()
         """
 
         declarations = []
+
+        if self.lexer.get_current_token().type is RPARENT:
+            return declarations
 
         var = self.lexer.get_current_token().value
         declarations.append(var)
@@ -136,10 +149,7 @@ class Parser:
         self.error('should be integer|real, got ' + token.type)
 
     def compound_statement(self):
-        self.match(BEGIN)
         nodes = self.statement_list()
-        self.match(END)
-
         compound = Compound()
         for node in nodes:
             compound.add(node)
@@ -156,25 +166,25 @@ class Parser:
 
     def statement(self):
         token = self.lexer.get_current_token()
-        if token.type is BEGIN:
-            return self.compound_statement()
-        elif token.type is ID:
+        if token.type is ID:
             next_token = self.lexer.peek_next_token()
             if next_token.type is LPARENT:
-                # procedure call
-                return self.procedure_call()
+                # function call
+                return self.function_call()
             else:
                 # assignment
                 return self.assignment_statement()
-        elif token.type is END:
+        elif token.type is RCBRACE:
+            # compound_statement finished here
+            # we use a trick here
+            # just return an emtpy token
             return self.emtpy()
 
-        print(token)
-        self.error("error in statement")
+        self.error("should be ID or LPARENT, got {}".format(token))
 
-    def procedure_call(self):
+    def function_call(self):
         """
-        procedure_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT
+        function_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT
         """
         current_token = self.lexer.get_current_token()
         proc_name = self.lexer.get_current_token().value
@@ -183,14 +193,14 @@ class Parser:
         if self.lexer.get_current_token().type is RPARENT:
             self.match(RPARENT)
             # no parameters
-            return ProcedureCall(proc_name, [], current_token)
+            return FunctionCall(proc_name, [], current_token)
         else:
             params = [self.base_expr()]
             while self.lexer.get_current_token().type is COMMA:
                 self.match(COMMA)
                 params.append(self.base_expr())
             self.match(RPARENT)
-            return ProcedureCall(proc_name, params, current_token)
+            return FunctionCall(proc_name, params, current_token)
 
     def assignment_statement(self):
         var = self.variable()
@@ -230,11 +240,11 @@ class Parser:
             self.lexer.go_forward()
             return Var(token)
 
-        print(token)
         self.error("error in variable")
 
-    @staticmethod
-    def error(message, error_code=None):
+    def error(self, message, error_code=None):
+        self.print_surrounding_tokens()
+
         if error_code is None:
             error_code = ErrorCode.PARSER_ERROR
         raise ParserError(
@@ -297,8 +307,9 @@ class Parser:
 
     def parse(self):
         program = self.program()
+
         if self.lexer.is_pointer_out_of_text():
             # all characters consumed
             return program
 
-        self.error("Syntax error at position " + self.lexer.get_position())
+        self.error("Syntax error at position " + str(self.lexer.get_position()))

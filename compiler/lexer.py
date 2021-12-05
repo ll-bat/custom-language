@@ -144,6 +144,18 @@ class Lexer:
     def skip_comment(self):
         while self.get_current_character() != "}":
             self.advance()
+
+        # skip '}'
+        cur_char = self.get_current_character()
+        self.advance()
+
+        # peek next character
+        next_char = self.get_current_character()
+
+        # commend should end with '}}'
+        if cur_char != next_char or cur_char != "}":
+            return self.error("Expected ']}' for comment, got {}".format(cur_char + next_char))
+
         self.advance()
 
     def get_next_token(self) -> Token:
@@ -183,9 +195,17 @@ class Lexer:
             self.advance()
             self.current_token = Token(ASSIGN, ASSIGN)
             return self.current_token
-        elif cur_char == "{":
+        elif cur_char == "{" and self.peek() == "{":
             self.skip_comment()
             return self.get_next_token()
+        elif cur_char == "{":
+            self.advance()
+            self.current_token = Token(LCBRACE, LCBRACE)
+            return self.current_token
+        elif cur_char == "}":
+            self.advance()
+            self.current_token = Token(RCBRACE, RCBRACE)
+            return self.current_token
         elif cur_char == ":":
             self.advance()
             self.current_token = Token(COLON, COLON)

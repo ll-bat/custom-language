@@ -84,9 +84,9 @@ class SemanticAnalyzer(NodeVisitor):
     def visit_VarSymbol(self, node: VarSymbol):
         self.symbol_table.define(node)
 
-    def visit_ProcedureDecl(self, node: ProcedureDecl):
+    def visit_FunctionDecl(self, node: FunctionDecl):
         """
-        Procedure declaration creates a new scope
+        function declaration creates a new scope
         """
         nested_scope = SymbolTable(enclosed_parent=self.symbol_table)
         self.symbol_table = nested_scope
@@ -98,25 +98,25 @@ class SemanticAnalyzer(NodeVisitor):
         self.visit(block)
 
         """
-        when we leave the procedure, the scope is finished as well 
+        when we leave the function, the scope is finished as well 
         """
         self.symbol_table = self.symbol_table.enclosed_parent
 
         self.symbol_table.define(node)
 
-    def visit_ProcedureCall(self, node: ProcedureCall):
+    def visit_FunctionCall(self, node: FunctionCall):
         if self.symbol_table.is_defined(node.name):
-            procedure: ProcedureDecl = self.symbol_table.lookup(node.name)
-            parameter_names = procedure.params
+            function: FunctionDecl = self.symbol_table.lookup(node.name)
+            parameter_names = function.params
             parameter_values = node.actual_params
             if len(parameter_names) != len(parameter_values):
                 self.error(ErrorCode.NUMBER_OF_ARGUMENTS_MISMATCH_ERROR,
                            "Number of arguments passed does not match "
-                           "with the procedure arguments count")
+                           "with the function arguments count")
         elif is_system_function(node.name):
             pass
         else:
-            self.error(ErrorCode.ID_NOT_FOUND, "procedure {} is not defined".format(node.name))
+            self.error(ErrorCode.ID_NOT_FOUND, "function {} is not defined".format(node.name))
 
     def analyze(self):
         return self.visit(self.tree)

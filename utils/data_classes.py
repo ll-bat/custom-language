@@ -156,22 +156,22 @@ class AbstractSymbol(abc.ABC):
     def is_symbol(self):
         return isinstance(self, Symbol)
 
-    def is_procedure(self):
-        return isinstance(self, ProcedureDecl)
+    def is_function(self):
+        return isinstance(self, FunctionDecl)
 
 
-class ProcedureDecl(AbstractSymbol):
+class FunctionDecl(AbstractSymbol):
     def __init__(self, proc_name, params, block):
-        super(ProcedureDecl, self).__init__(proc_name)
+        super(FunctionDecl, self).__init__(proc_name)
         self.name = proc_name
         self.block = block
         self.params = params if params is not None else []
 
     def __str__(self):
-        return f'ProcedureDecl({self.name}, {self.params}, {self.block})'
+        return f'FunctionDecl({self.name}, {self.params}, {self.block})'
 
 
-class ProcedureCall(AST):
+class FunctionCall(AST):
     def __init__(self, name, actual_params, token):
         self.name = name
         self.actual_params = actual_params
@@ -181,7 +181,7 @@ class ProcedureCall(AST):
         res = ""
         for param in self.actual_params:
             res += str(param) + ", "
-        return f'ProcedureCall({self.name}, {res}, {self.token})'
+        return f'FunctionCall({self.name}, {res}, {self.token})'
 
 
 class Symbol(AbstractSymbol):

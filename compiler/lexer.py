@@ -10,6 +10,7 @@ class Lexer:
         self.text = text
         self.lineno = 1
         self.column = 1
+        self._saved_state = {}
         self.current_token = self.get_next_token()
 
     def error(self, message):
@@ -19,6 +20,23 @@ class Lexer:
             f' message: {message}'
 
         raise LexerError(ErrorCode, s)
+
+    def save_current_state(self):
+        self._saved_state = {
+            "pos": self.pos,
+            "lineno": self.lineno,
+            "column": self.column,
+            "current_token": self.current_token,
+        }
+
+    def use_saved_state(self):
+        if self._saved_state is None:
+            self.error('_saved_state is None')
+
+        for key, val in self._saved_state.items():
+            self.__setattr__(key, val)
+
+        self._saved_state = None
 
     def is_pointer_out_of_text(self, pos=None):
         if pos is None:

@@ -12,30 +12,45 @@ try:
                a, b, c, x : INTEGER;
                y          : REAL;
                s          : STRING;
-            
+
             function p1 (a, b : INTEGER)
             {
-                s = "something";
                 y = 222;
-                c = a + b;
-                print(c);
+                s = "something";
                 print("print" + " " + s, "really", "interesting");
             }
-                        
+
             function p2()
             {
                 print(y);
             }
+
+            function mathPow(base: INTEGER; power: INTEGER) {
+                {{ print(pow(base, power)) }} 
+            }
             
+            function nestedFunction() {
+                function nested() {
+                    print('im nested');
+                }
+                nested();
+            }
+            
+            nestedFunction();
+            
+            x = 1;
+            
+            VAR z : INTEGER;
+
             number = 2;
             a = number;
             b = 10 * a + 10 * number DIV 4;
             c = a - - b;
-            
+
             p1 (1 + 2, 3);
-                              
+
             {{ writeln('y = ', y); }}
-            
+
         }  {{Part10}}
     """
 
@@ -59,4 +74,3 @@ except (ParserError, SemanticError, LexerError) as ex:
     print(ex)
 except Exception as e:
     print(e)
-

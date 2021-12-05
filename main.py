@@ -15,16 +15,18 @@ try:
 
             function p1 (a, b : INTEGER)
             {
-                s = "something";
                 y = 222;
-                c = a + b;
-                print(c);
+                s = "something";
                 print("print" + " " + s, "really", "interesting");
             }
 
             function p2()
             {
                 print(y);
+            }
+            
+            function pow(base: INTEGER, power: INTEGER) {
+                print(pow(base, power))
             }
 
             number = 2;

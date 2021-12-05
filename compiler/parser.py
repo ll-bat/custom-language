@@ -1,3 +1,5 @@
+from typing import List
+
 from compiler.lexer import Lexer
 from utils.constants import *
 from utils.data_classes import *
@@ -19,7 +21,7 @@ class Parser:
     base_type: INTEGER | REAL | STRING
     compound_statement: statement_list
     statement_list: statement (SEMI statement)*
-    statement: assignment_statement | function_call | empty
+    statement: assignment_statement | function_call | declarations | empty
     function_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT SEMI
     empty:
     assignment_statement: variable ASSIGN base_expr
@@ -43,6 +45,29 @@ class Parser:
                 self.lexer.go_forward()
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
+    def is_function_call(self):
+        return self.next_tokens_are(ID, LPARENT)
+
+    def is_assignment(self):
+        return self.next_tokens_are(ID, ASSIGN)
+
+    def is_declaration(self):
+        token = self.lexer.get_current_token()
+        return token.type in (VAR, FUNCTION)
+
+    def next_tokens_are(self, *args):
+        self.lexer.save_current_state()
+        state = True
+        for arg in args:
+            token = self.lexer.get_current_token()
+            if token.type is not arg:
+                state = False
+                break
+            self.lexer.go_forward()
+
+        self.lexer.use_saved_state()
+        return state
+
     def program(self):
         self.match(PROGRAM)
         self.variable()
@@ -58,27 +83,30 @@ class Parser:
 
     def declarations(self) -> list:
         declarations = []
-        if self.lexer.get_current_token().type is VAR:
-            self.match(VAR)
-            while self.lexer.get_current_token().type is ID:
-                declarations.append(self.variable_declaration())
-                self.match(SEMI)
 
-        while self.lexer.get_current_token().type is FUNCTION:
-            self.match(FUNCTION)
-            proc_name = self.lexer.get_current_token().value
-            self.match(ID)
+        while self.lexer.get_current_token().type in (VAR, FUNCTION):
+            if self.lexer.get_current_token().type is VAR:
+                self.match(VAR)
+                while self.next_tokens_are(ID, COMMA) or self.next_tokens_are(ID, COLON):
+                    # var x, y || var x : integer
+                    declarations.append(self.variable_declaration())
+                    self.match(SEMI)
 
-            parameters_list = []
-            if self.lexer.current_token.type is LPARENT:
-                self.match(LPARENT)
-                parameters_list = self.parameters_list()
-                self.match(RPARENT)
+            while self.lexer.get_current_token().type is FUNCTION:
+                self.match(FUNCTION)
+                proc_name = self.lexer.get_current_token().value
+                self.match(ID)
 
-            block = self.block()
+                parameters_list = []
+                if self.lexer.current_token.type is LPARENT:
+                    self.match(LPARENT)
+                    parameters_list = self.parameters_list()
+                    self.match(RPARENT)
 
-            function_decl = FunctionDecl(proc_name, parameters_list, block)
-            declarations.append(function_decl)
+                block = self.block()
+
+                function_decl = FunctionDecl(proc_name, parameters_list, block)
+                declarations.append(function_decl)
 
         return declarations
 
@@ -156,24 +184,40 @@ class Parser:
 
         return compound
 
+    def is_compound_statement(self):
+        return self.is_function_call() or self.is_assignment() or self.is_declaration()
+
     def statement_list(self):
-        children = [self.statement()]
-        while self.lexer.get_current_token().type is SEMI:
-            self.match(SEMI)
-            nodes = self.statement_list()
-            children += nodes
+        children = []
+        statement = self.statement()
+        if isinstance(statement, list):
+            for node in statement:
+                children.append(node)
+        else:
+            children.append(statement)
+
+        while self.is_compound_statement():
+            statement = self.statement_list()
+            if isinstance(statement, list):
+                for node in statement:
+                    children.append(node)
+            else:
+                children.append(statement)
+
         return children
 
     def statement(self):
         token = self.lexer.get_current_token()
-        if token.type is ID:
-            next_token = self.lexer.peek_next_token()
-            if next_token.type is LPARENT:
-                # function call
-                return self.function_call()
-            else:
-                # assignment
-                return self.assignment_statement()
+
+        if self.is_function_call():
+            # function call
+            return self.function_call()
+        elif self.is_assignment():
+            # assignment
+            return self.assignment_statement()
+        elif self.is_declaration():
+            # variable or function declaration
+            return self.declarations()
         elif token.type is RCBRACE:
             # compound_statement finished here
             # we use a trick here
@@ -192,6 +236,7 @@ class Parser:
         self.match(LPARENT)
         if self.lexer.get_current_token().type is RPARENT:
             self.match(RPARENT)
+            self.match(SEMI)
             # no parameters
             return FunctionCall(proc_name, [], current_token)
         else:
@@ -200,12 +245,14 @@ class Parser:
                 self.match(COMMA)
                 params.append(self.base_expr())
             self.match(RPARENT)
+            self.match(SEMI)
             return FunctionCall(proc_name, params, current_token)
 
     def assignment_statement(self):
         var = self.variable()
         self.match(ASSIGN)
         base_expr = self.base_expr()
+        self.match(SEMI)
         return Assign(var, Token(ASSIGN, Assign), base_expr)
 
     def base_expr(self):

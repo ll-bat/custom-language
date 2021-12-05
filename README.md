@@ -69,4 +69,5 @@
 ```
 
 ### Currently, language does not support many features, but it's in development process 
-### Language is made for learning purposes
+<br />
+Language is made for learning purposes

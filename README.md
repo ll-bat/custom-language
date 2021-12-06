@@ -34,7 +34,15 @@
     function foo(s: STRING) {
         ... 
         print(s) 
+    
+        function bar() {
+            return 2;
+        }
+        
+        return bar(); 
     }   
+    
+    print(foo("bar")); // prints 2
 ```
 
 #### Function call 

@@ -22,6 +22,11 @@ class AST:
     pass
 
 
+class Valuable(abc.ABC):
+    def get_value(self):
+        pass
+
+
 class Num(AST):
     def __init__(self, token: Token):
         self.token = token
@@ -87,10 +92,13 @@ class Compound(AST):
         return f'Compound({res})'
 
 
-class Var(AST):
+class Var(AST, Valuable):
     def __init__(self, token: Token):
         self.token = token
         self.value = token.value
+
+    def get_value(self):
+        return self.value
 
     def __str__(self):
         return f'Var({self.value})'
@@ -160,15 +168,19 @@ class AbstractSymbol(abc.ABC):
         return isinstance(self, FunctionDecl)
 
 
-class FunctionDecl(AbstractSymbol):
-    def __init__(self, proc_name, params, block):
+class FunctionDecl(AbstractSymbol, Valuable):
+    def __init__(self, proc_name, params, block, return_expression=None):
         super(FunctionDecl, self).__init__(proc_name)
         self.name = proc_name
         self.block = block
         self.params = params if params is not None else []
+        self.return_expression = return_expression
+
+    def get_value(self):
+        return str(self)
 
     def __str__(self):
-        return f'FunctionDecl({self.name}, {self.params}, {self.block})'
+        return f'FunctionDecl({self.name}, {self.params}, {self.block}, {self.return_expression})'
 
 
 class FunctionCall(AST):

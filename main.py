@@ -7,38 +7,22 @@ try:
     string = """
         PROGRAM Part10
         {
-            VAR
-               number     : INTEGER;
-               a, b, c, x : INTEGER;
-               y          : REAL;
-               s          : STRING;
-
-            function p1 (a, b : INTEGER)
-            {
-                y = 222;
-                s = "something";
-                print("print" + " " + s, "really", "interesting");
+            function foo() {
+                function bar() {
+                    return 2;
+                }
+                return bar() * 2;
             }
 
-            function p2()
-            {
-                print(y);
-            }
-            
-            function pow(base: INTEGER, power: INTEGER) {
-                print(pow(base, power))
-            }
+            VAR a : integer;
+            a = foo;
+            print(a);
 
-            number = 2;
-            a = number;
-            b = 10 * a + 10 * number DIV 4;
-            c = a - - b;
+            a = 1 + foo();
+            print(a);
 
-            p1 (1 + 2, 3);
-
-            {{ writeln('y = ', y); }}
-
-        }  {{Part10}}
+            print(foo);
+        }  
     """
 
     # lexer = Lexer(string)
@@ -61,4 +45,3 @@ except (ParserError, SemanticError, LexerError) as ex:
     print(ex)
 except Exception as e:
     print(e)
-

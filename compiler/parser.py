@@ -25,11 +25,11 @@ class Parser:
     function_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT SEMI
     empty:
     assignment_statement: variable ASSIGN base_expr
-    base_expr: (expr|str_expr)
+    base_expr: expr| str_expr| function_call
     str_expr: STRING (PLUS (STRING|variable))*
     expr: term ((PLUS, MINUS) term)*
     term: factor ((DIV, MULT, FLOAT_DIV) factor)*
-    factor: PLUS factor | MINUS factor | INTEGER | REAL_INTEGER | LPARENT expr RPARENT | variable
+    factor: PLUS factor | MINUS factor | INTEGER | REAL_INTEGER | LPARENT expr RPARENT | variable | function_call
     variable: ID
     """
 
@@ -81,6 +81,18 @@ class Parser:
         self.match(RCBRACE)
         return Block(declarations, compound_statement)
 
+    def function_block(self):
+        declarations = self.declarations()
+        compound_statement = self.compound_statement()
+        return Block(declarations, compound_statement)
+
+    def function_return_statement(self):
+        returns = None
+        if self.next_tokens_are(RETURN):
+            self.match(RETURN)
+            returns = self.base_expr()
+        return returns
+
     def declarations(self) -> list:
         declarations = []
 
@@ -103,9 +115,13 @@ class Parser:
                     parameters_list = self.parameters_list()
                     self.match(RPARENT)
 
-                block = self.block()
+                self.match(LCBRACE)
+                block = self.function_block()
+                returns = self.function_return_statement()
+                self.match(SEMI)
+                self.match(RCBRACE)
 
-                function_decl = FunctionDecl(proc_name, parameters_list, block)
+                function_decl = FunctionDecl(proc_name, parameters_list, block, returns)
                 declarations.append(function_decl)
 
         return declarations
@@ -211,14 +227,18 @@ class Parser:
 
         if self.is_function_call():
             # function call
-            return self.function_call()
+            node = self.function_call()
+            self.match(SEMI)
+            return node
         elif self.is_assignment():
             # assignment
-            return self.assignment_statement()
+            node = self.assignment_statement()
+            self.match(SEMI)
+            return node
         elif self.is_declaration():
             # variable or function declaration
             return self.declarations()
-        elif token.type is RCBRACE:
+        elif token.type in (RCBRACE, RETURN):
             # compound_statement finished here
             # we use a trick here
             # just return an emtpy token
@@ -236,7 +256,6 @@ class Parser:
         self.match(LPARENT)
         if self.lexer.get_current_token().type is RPARENT:
             self.match(RPARENT)
-            self.match(SEMI)
             # no parameters
             return FunctionCall(proc_name, [], current_token)
         else:
@@ -245,14 +264,12 @@ class Parser:
                 self.match(COMMA)
                 params.append(self.base_expr())
             self.match(RPARENT)
-            self.match(SEMI)
             return FunctionCall(proc_name, params, current_token)
 
     def assignment_statement(self):
         var = self.variable()
         self.match(ASSIGN)
         base_expr = self.base_expr()
-        self.match(SEMI)
         return Assign(var, Token(ASSIGN, Assign), base_expr)
 
     def base_expr(self):
@@ -346,6 +363,8 @@ class Parser:
             node = self.expr()
             self.match(RPARENT)
             return node
+        elif self.is_function_call():
+            return self.function_call()
         elif token.type is ID:
             self.lexer.go_forward()
             return Var(token)

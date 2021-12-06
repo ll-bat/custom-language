@@ -74,6 +74,10 @@ class Interpreter(NodeVisitor, NestedScopeable):
         symbol = self.symbol_table.lookup(var_name)
         if symbol is None:
             raise SyntaxError("variable '" + var_name + "' is not defined")
+
+        if isinstance(symbol, FunctionDecl):
+            return symbol
+
         return symbol.value
 
     def visit_NoOp(self, node):
@@ -128,7 +132,11 @@ class Interpreter(NodeVisitor, NestedScopeable):
 
         block = function.block
         self.visit(block)
+
+        returns = self.visit(function.return_expression)
         self.destroy_current_scope()
+
+        return returns
 
     def interpret(self):
         return self.visit(self.tree)

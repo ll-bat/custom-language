@@ -123,7 +123,11 @@ class Lexer:
             result += self.get_current_character()
             self.advance()
 
-        if result in RESERVED_KEYWORDS:
+        if result.upper() in RESERVED_KEYWORDS:
+            result = result.upper()
+            return self.get_reserved_keyword_token(result)
+        elif result.lower() in RESERVED_KEYWORDS:
+            result = result.lower()
             return self.get_reserved_keyword_token(result)
 
         return Token(ID, result)

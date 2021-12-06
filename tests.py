@@ -7,51 +7,22 @@ try:
     string = """
         PROGRAM Part10
         {
-            VAR
-               number     : INTEGER;
-               a, b, c, x : INTEGER;
-               y          : REAL;
-               s          : STRING;
-
-            function p1 (a, b : INTEGER)
-            {
-                y = 222;
-                s = "something";
-                print("print" + " " + s, "really", "interesting");
-            }
-
-            function p2()
-            {
-                print(y);
-            }
-
-            function mathPow(base: INTEGER; power: INTEGER) {
-                {{ print(pow(base, power)) }} 
-            }
-            
-            function nestedFunction() {
-                function nested() {
-                    print('im nested');
+            function foo() {
+                function bar() {
+                    return 2;
                 }
-                nested();
+                return bar() * 2;
             }
             
-            nestedFunction();
+            VAR a : integer;
+            a = foo;
+            print(a);
             
-            x = 1;
+            a = 1 + foo();
+            print(a);
             
-            VAR z : INTEGER;
-
-            number = 2;
-            a = number;
-            b = 10 * a + 10 * number DIV 4;
-            c = a - - b;
-
-            p1 (1 + 2, 3);
-
-            {{ writeln('y = ', y); }}
-
-        }  {{Part10}}
+            print(foo);
+        }  
     """
 
     # lexer = Lexer(string)

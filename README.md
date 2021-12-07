@@ -13,13 +13,20 @@
 
 #### Variable declaration
 ```javascript
-    VAR x, y : INTEGER;
-    VAR s    : REAL; 
+    var x, y : integer;
+    var s    : real; 
+    var c    : string;
+    var f    : boolean;
 ```
 
 ##### Assignment statements 
 ```javascript
     x = 1 * 2 + 3 - 4 / 5 * (1 + 2)
+```
+
+##### Boolean expressions
+```python
+    flag = True and False or !False and (True and False)
 ```
 
 #### Function declaration 

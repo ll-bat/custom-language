@@ -7,21 +7,11 @@ try:
     string = """
         PROGRAM Part10
         {
-            function foo() {
-                function bar() {
-                    return 2;
-                }
-                return bar() * 2;
-            }
+            var flag : boolean;
 
-            VAR a : integer;
-            a = foo;
-            print(a);
+            flag = true and false or !false and (true and false);
 
-            a = 1 + foo();
-            print(a);
-
-            print(foo);
+            print(flag); 
         }  
     """
 

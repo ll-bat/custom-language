@@ -1,6 +1,6 @@
 from typing import List
 from utils.errors import InterpreterError, ErrorCode
-from system.builtin_functions.main import is_system_function, call_system_function
+from system.builtin_functions.main import is_system_function, call_system_function, evaluate_bool_expression, not_bool
 from compiler.scopes import NestedScopeable
 from compiler.symbol_table import SymbolTable
 from utils.data_classes import *
@@ -137,6 +137,20 @@ class Interpreter(NodeVisitor, NestedScopeable):
         self.destroy_current_scope()
 
         return returns
+
+    @staticmethod
+    def visit_BooleanSymbol(node: BooleanSymbol):
+        return node.value
+
+    def visit_BoolOp(self, node: BoolOp):
+        left = self.visit(node.left)
+        op = node.op.value
+        right = self.visit(node.right)
+        return evaluate_bool_expression(left, op, right)
+
+    def visit_NotOp(self, node: NotOp):
+        val = self.visit(node.expr)
+        return not_bool(val)
 
     def interpret(self):
         return self.visit(self.tree)

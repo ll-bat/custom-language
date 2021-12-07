@@ -1,4 +1,11 @@
 import abc
+from enum import Enum
+
+
+class SymbolTypes(Enum):
+    INTEGER = "INTEGER"
+    STRING = "STRING"
+    BOOLEAN = "BOOLEAN"
 
 
 class Token:
@@ -197,13 +204,14 @@ class FunctionCall(AST):
 
 
 class Symbol(AbstractSymbol):
-    def __init__(self, name, value=None):
+    def __init__(self, name, value=None, symbol_type: SymbolTypes | None = None):
         super().__init__(name)
         self.name = name
         self.value = value
+        self.type = symbol_type
 
     def __str__(self):
-        return f'Symbol({self.name}, {self.value})'
+        return f'{self.__class__.__name__}({self.name}, {self.value})'
 
     __repr__ = __str__
 
@@ -213,6 +221,29 @@ class VarSymbol(Symbol):
         super().__init__(name, value)
 
 
+class BooleanSymbol(Symbol):
+    def __init__(self, value):
+        super().__init__(None, value, SymbolTypes.BOOLEAN)
+
+
 class BuiltinTypeSymbol(Symbol):
     def __init__(self, name):
         super().__init__(name)
+
+
+class BoolOp(AST):
+    def __init__(self, left, op: Token, right):
+        self.left = left
+        self.op = self.token = op
+        self.right = right
+
+    def __str__(self):
+        return f'BoolOp({self.left}, {self.op}, {self.right})'
+
+
+class NotOp(AST):
+    def __init__(self, expr):
+        self.expr = expr
+
+    def __str__(self):
+        return f'NotOp({self.expr})'

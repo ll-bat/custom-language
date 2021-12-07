@@ -18,14 +18,16 @@ class Parser:
     formal_parameter_list: formal_parameter (SEMI format_parameter)*
     format_parameter: ID (COMMA ID)* COLON integer_type
     variable_declaration: ID (COMMA, ID)* COLON base_type
-    base_type: INTEGER | REAL | STRING
+    base_type: INTEGER | REAL | STRING | BOOLEAN
     compound_statement: statement_list
     statement_list: statement (SEMI statement)*
     statement: assignment_statement | function_call | declarations | empty
     function_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT SEMI
     empty:
     assignment_statement: variable ASSIGN base_expr
-    base_expr: expr| str_expr| function_call
+    base_expr: expr | str_expr | bool_expr
+    bool_expr: bool_term ((OR, AND) bool_term)*
+    bool_term: NOT bool_term | LPARENT bool_expr RPARENT | TRUE | FALSE
     str_expr: STRING (PLUS (STRING|variable))*
     expr: term ((PLUS, MINUS) term)*
     term: factor ((DIV, MULT, FLOAT_DIV) factor)*
@@ -178,11 +180,11 @@ class Parser:
 
     def base_type(self):
         token = self.lexer.get_current_token()
-        if token.type in (INTEGER, REAL, STRING):
+        if token.type in (INTEGER, REAL, STRING, BOOLEAN):
             self.lexer.go_forward()
             return token
 
-        self.error('should be integer|real|string, got ' + token.type)
+        self.error('should be integer|real|string|boolean, got ' + token.type)
 
     def integer_type(self):
         token = self.lexer.get_current_token()
@@ -273,10 +275,42 @@ class Parser:
         return Assign(var, Token(ASSIGN, Assign), base_expr)
 
     def base_expr(self):
-        if self.lexer.get_current_token().type is STRING:
+        token = self.lexer.get_current_token()
+        if token.type is STRING:
             return self.str_expr()
+        elif self.next_tokens_are(NOT) or self.next_tokens_are(BOOLEAN):
+            return self.bool_expr()
         else:
             return self.expr()
+
+    def bool_expr(self):
+        #  bool_expr: bool_term ((OR, AND) bool_term)*
+        bool_term = self.bool_term()
+        while self.lexer.get_current_token().type in (OR, AND):
+            op = self.lexer.get_current_token()
+            self.lexer.go_forward()
+            bool_term = BoolOp(bool_term, op, self.bool_term())
+
+        return bool_term
+
+    def bool_term(self):
+        #  bool_term: NOT bool_term | LPARENT bool_expr RPARENT | TRUE | FALSE
+        token = self.lexer.get_current_token()
+        if token.type is NOT:
+            self.match(NOT)
+            return NotOp(self.bool_term())
+
+        if token.type is BOOLEAN:
+            self.match(BOOLEAN)
+            return BooleanSymbol(token.value)
+
+        if token.type is LPARENT:
+            self.match(LPARENT)
+            node = self.bool_expr()
+            self.match(RPARENT)
+            return node
+
+        self.error("error in bool_term, got {}".format(token))
 
     def str_expr(self):
         var = self.lexer.current_token

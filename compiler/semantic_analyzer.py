@@ -1,4 +1,4 @@
-from utils.constants import PLUS
+from utils.constants import PLUS, TRUE, FALSE
 from system.builtin_functions.main import is_system_function
 from utils.data_classes import *
 from utils.errors import SemanticError, ErrorCode
@@ -117,6 +117,17 @@ class SemanticAnalyzer(NodeVisitor):
             pass
         else:
             self.error(ErrorCode.ID_NOT_FOUND, "function {} is not defined".format(node.name))
+
+    def visit_BooleanSymbol(self, node: BooleanSymbol):
+        if node.value not in (TRUE, FALSE):
+            self.error(ErrorCode.SEMANTIC_ERROR, "BooleanSymbol got value {}".format(node.value))
+
+    def visit_BoolOp(self, node: BoolOp):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_NotOp(self, node: NotOp):
+        self.visit(node.expr)
 
     def analyze(self):
         return self.visit(self.tree)

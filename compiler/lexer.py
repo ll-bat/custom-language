@@ -4,14 +4,15 @@ from utils.errors import LexerError, ErrorCode
 from system.reserved import RESERVED_KEYWORDS
 
 
-class Lexer:
+class Lexer(object):
     def __init__(self, text):
         self.pos = 0
         self.text = text
         self.lineno = 1
         self.column = 1
-        self._saved_state = {}
-        self.current_token = self.get_next_token()
+        self._saved_states = list()
+        self.current_token = None
+        self.get_next_token()
 
     def error(self, message):
         s = f'Lexer error on {self.get_current_character()};' \
@@ -22,21 +23,23 @@ class Lexer:
         raise LexerError(ErrorCode, s)
 
     def save_current_state(self):
-        self._saved_state = {
+        self._saved_states.append({
             "pos": self.pos,
             "lineno": self.lineno,
             "column": self.column,
             "current_token": self.current_token,
-        }
+        })
+
+    def __setattr__(self, key, value):
+        super().__setattr__(key, value)
 
     def use_saved_state(self):
-        if self._saved_state is None:
+        if len(self._saved_states) == 0:
             self.error('_saved_state is None')
 
-        for key, val in self._saved_state.items():
+        last_state = self._saved_states.pop()
+        for key, val in last_state.items():
             self.__setattr__(key, val)
-
-        self._saved_state = None
 
     def is_pointer_out_of_text(self, pos=None):
         if pos is None:
@@ -70,6 +73,18 @@ class Lexer:
     def get_current_character(self) -> str:
         return self.get_character(self.pos)
 
+    def next_characters_are(self, chars):
+        self.save_current_state()
+
+        for char in chars:
+            cur = self.get_character(self.pos)
+            if cur != char:
+                self.use_saved_state()
+                return False
+            self.advance()
+        self.use_saved_state()
+        return True
+
     @staticmethod
     def is_digit(num):
         if isinstance(num, str):
@@ -99,14 +114,15 @@ class Lexer:
 
         return element_type
 
-    def advance(self):
-        if self.get_current_character() == '\n':
-            self.lineno += 1
-            self.column = 1
-        else:
-            self.column += 1
+    def advance(self, num_of_chars=1):
+        for _ in range(num_of_chars):
+            if self.get_current_character() == '\n':
+                self.lineno += 1
+                self.column = 1
+            else:
+                self.column += 1
 
-        self.pos = self.pos + 1
+            self.pos = self.pos + 1
 
     def peek(self):
         if self.is_pointer_out_of_text(self.get_position() + 1):
@@ -193,6 +209,14 @@ class Lexer:
             # STRING
             self.current_token = self._string()
             return self.current_token
+        elif self.next_characters_are("or"):
+            self.advance(2)
+            self.current_token = Token(OR, OR)
+            return self.current_token
+        elif self.next_characters_are("and"):
+            self.advance(3)
+            self.current_token = Token(AND, AND)
+            return self.current_token
         elif cur_char.isalpha():
             # ID
             self.current_token = self._id()
@@ -235,6 +259,10 @@ class Lexer:
         elif cur_char == ',':
             self.advance()
             self.current_token = Token(COMMA, COMMA)
+            return self.current_token
+        elif cur_char == "!":
+            self.advance()
+            self.current_token = Token(NOT, NOT)
             return self.current_token
         else:
             if cur_char.isspace():

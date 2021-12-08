@@ -196,6 +196,11 @@ class Lexer(object):
 
         self.advance()
 
+    def skip_one_line_comment(self):
+        while self.get_current_character() != "\n":
+            self.advance()
+        self.advance()
+
     def get_next_token(self) -> Token:
         cur_char = self.get_current_character()
         if cur_char is None:
@@ -209,6 +214,10 @@ class Lexer(object):
             # STRING
             self.current_token = self._string()
             return self.current_token
+        elif self.next_characters_are("//"):
+            # one line comment
+            self.skip_one_line_comment()
+            return self.get_next_token()
         elif self.next_characters_are("or"):
             self.advance(2)
             self.current_token = Token(OR, OR)
@@ -241,7 +250,7 @@ class Lexer(object):
             self.advance()
             self.current_token = Token(ASSIGN, ASSIGN)
             return self.current_token
-        elif cur_char == "{" and self.peek() == "{":
+        elif self.next_characters_are("{{"):
             self.skip_comment()
             return self.get_next_token()
         elif cur_char == "{":

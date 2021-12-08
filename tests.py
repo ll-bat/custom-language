@@ -9,6 +9,7 @@ try:
         {
             var flag : boolean;
             
+            // this is the flag 
             flag = true and false or !false and (true and false);
             
             print(flag); 

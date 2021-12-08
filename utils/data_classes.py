@@ -5,6 +5,7 @@ from enum import Enum
 class SymbolTypes(Enum):
     INTEGER = "INTEGER"
     STRING = "STRING"
+    REAL = "REAL"
     BOOLEAN = "BOOLEAN"
 
 
@@ -204,21 +205,21 @@ class FunctionCall(AST):
 
 
 class Symbol(AbstractSymbol):
-    def __init__(self, name, value=None, symbol_type: SymbolTypes | None = None):
+    def __init__(self, name, value=None, symbol_type=None):
         super().__init__(name)
         self.name = name
         self.value = value
         self.type = symbol_type
 
     def __str__(self):
-        return f'{self.__class__.__name__}({self.name}, {self.value})'
+        return f'{self.__class__.__name__}({self.name}, {self.value}, {self.type})'
 
     __repr__ = __str__
 
 
 class VarSymbol(Symbol):
-    def __init__(self, name, value):
-        super().__init__(name, value)
+    def __init__(self, name, value, base_type=None):
+        super().__init__(name, value, base_type)
 
 
 class BooleanSymbol(Symbol):

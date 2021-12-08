@@ -1,6 +1,7 @@
 from typing import List
 from utils.errors import InterpreterError, ErrorCode
-from system.builtin_functions.main import is_system_function, call_system_function, evaluate_bool_expression, not_bool
+from system.builtin_functions.main import is_system_function, call_system_function, evaluate_bool_expression, not_bool, \
+    is_val_of_type
 from compiler.scopes import NestedScopeable
 from compiler.symbol_table import SymbolTable
 from utils.data_classes import *
@@ -13,7 +14,7 @@ class Interpreter(NodeVisitor, NestedScopeable):
         super().__init__(SymbolTable())
 
     def error(self, message):
-        raise InterpreterError(ErrorCode.INTERPRETER_ERROR, "can only concatenate strings")
+        raise InterpreterError(ErrorCode.INTERPRETER_ERROR, message)
 
     def visit_BinOp(self, node: BinOp):
         left = self.visit(node.left)
@@ -64,13 +65,20 @@ class Interpreter(NodeVisitor, NestedScopeable):
         expr = self.visit(node.right)
 
         if self.symbol_table.is_defined(var_name):
-            return self.symbol_table.assign(var_name, Symbol(var_name, expr))
+            # type checking
+            symbol: Symbol = self.symbol_table.lookup(var_name)
+            base_type = symbol.type
+            if not is_val_of_type(expr, base_type):
+                self.error(
+                    "can't assign {} to var {} as type of {} is {}".format(expr, symbol.name, symbol.name, base_type))
+            return self.symbol_table.assign(var_name, Symbol(var_name, expr, base_type))
         else:
             raise ValueError(f"value {var_name} is not defined")
 
     def visit_Var(self, node: Var):
         var_name = node.value
 
+        # type: Symbol
         symbol = self.symbol_table.lookup(var_name)
         if symbol is None:
             raise SyntaxError("variable '" + var_name + "' is not defined")
@@ -101,7 +109,7 @@ class Interpreter(NodeVisitor, NestedScopeable):
         symbol_type = node.get_type()
         # print(symbol_type)
         for var in declarations:
-            symbol = VarSymbol(var.value, symbol_type.value)
+            symbol = VarSymbol(var.value, symbol_type.value, symbol_type.value)
             self.symbol_table.define(symbol)
 
     def visit_VarSymbol(self, node: VarSymbol):
@@ -151,6 +159,10 @@ class Interpreter(NodeVisitor, NestedScopeable):
     def visit_NotOp(self, node: NotOp):
         val = self.visit(node.expr)
         return not_bool(val)
+
+    @staticmethod
+    def visit_NoneType(node):
+        return None
 
     def interpret(self):
         return self.visit(self.tree)

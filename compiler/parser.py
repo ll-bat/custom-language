@@ -118,9 +118,12 @@ class Parser:
                     self.match(RPARENT)
 
                 self.match(LCBRACE)
+
                 block = self.function_block()
                 returns = self.function_return_statement()
-                self.match(SEMI)
+                if returns is not None:
+                    self.match(SEMI)
+
                 self.match(RCBRACE)
 
                 function_decl = FunctionDecl(proc_name, parameters_list, block, returns)

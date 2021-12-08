@@ -1,4 +1,4 @@
-from utils.constants import TRUE, FALSE, OR, AND
+from utils.constants import TRUE, FALSE, OR, AND, INTEGER, REAL, STRING, BOOLEAN
 
 
 class BuiltinFunctions:
@@ -49,3 +49,30 @@ def not_bool(bool_val):
     if bool_val is TRUE:
         return FALSE
     return TRUE
+
+
+def is_val_of_type(val, base_type):
+    if base_type not in (INTEGER, REAL, STRING, BOOLEAN):
+        raise ValueError('base_type must be int,str,bool or real type')
+
+    if val is None:
+        return True
+
+    if base_type in (INTEGER, REAL):
+        if base_type == INTEGER:
+            try:
+                return isinstance(int(val), int) and str(val).count('.') == 0
+            except Exception as e:
+                return False
+        else:
+            try:
+                return isinstance(float(val), float)
+            except Exception as e:
+                return False
+    elif base_type is STRING:
+        return isinstance(val, str)
+    elif base_type is BOOLEAN:
+        try:
+            return str(val).lower() in (TRUE.lower(), FALSE.lower())
+        except Exception as e:
+            return False

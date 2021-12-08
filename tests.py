@@ -13,11 +13,15 @@ try:
             var b : boolean;
             
             function foo() {
-                return 1 + 2;
+                return 1;
+            }
+            
+            function say(s : string) {
+                return s;
             }
             
             x = foo();
-            s = "something";
+            s = say("something");
             r = 1.5;
             b = true;
             

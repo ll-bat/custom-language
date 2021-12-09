@@ -22,17 +22,21 @@
 ##### Assignment statements 
 ```javascript
     x = 1 * 2 + 3 - 4 / 5 * (1 + 2)
+    f = true;
+    s = 1.5;
+    c = "My language"
 ```
 
 ##### Boolean expressions
 ```python
     flag = True and False or !False and (True and False)
+    flag = 1 < 2 and 2 > 1 
 ```
 
 #### Function declaration 
 ```javascript
     function foo(s: STRING) {
-        VAR c : STRING = s 
+        VAR c : STRING;
     }   
 ```
 
@@ -69,7 +73,7 @@
 
 #### Program snippet
 ```javascript
-    PROGRAM Part10
+    PROGRAM PartN11
         {
             VAR y : REAL;
                         
@@ -80,7 +84,7 @@
             
             y = 1.5 * 2 + 1;
             
-            printSomething(); {{ "prints 4" }}
+            printSomething(); // "prints 4" 
         }
 ```
 

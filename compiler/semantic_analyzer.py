@@ -129,5 +129,37 @@ class SemanticAnalyzer(NodeVisitor):
     def visit_NotOp(self, node: NotOp):
         self.visit(node.expr)
 
+    def visit_BoolNotEqual(self, node: BoolNotEqual):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_BoolOr(self, node: BoolOr):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_BoolAnd(self, node: BoolAnd):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_BoolGreaterThan(self, node: BoolGreaterThan):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_BoolGreaterThanOrEqual(self, node: BoolGreaterThanOrEqual):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_BoolLessThan(self, node: BoolLessThan):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_BoolLessThanOrEqual(self, node: BoolLessThanOrEqual):
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def visit_BoolIsEqual(self, node: BoolIsEqual):
+        self.visit(node.left)
+        self.visit(node.right)
+
     def analyze(self):
         return self.visit(self.tree)

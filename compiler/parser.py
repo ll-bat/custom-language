@@ -27,7 +27,8 @@ class Parser:
     assignment_statement: variable ASSIGN base_expr
     base_expr: expr | str_expr | bool_expr
     bool_expr: bool_term ((OR, AND) bool_term)*
-    bool_term: NOT bool_term | LPARENT bool_expr RPARENT | TRUE | FALSE
+    bool_term: bool_factor ((>, >=, <, <=, !=, ==) bool_factor)*
+    bool_factor: NOT bool_term | LPARENT bool_expr RPARENT | TRUE | FALSE | ID | function_call
     str_expr: STRING (PLUS (STRING|variable))*
     expr: term ((PLUS, MINUS) term)*
     term: factor ((DIV, MULT, FLOAT_DIV) factor)*
@@ -292,10 +293,11 @@ class Parser:
         return self.next_tokens_are(ID, LPARENT)
 
     def is_next_bool_expr(self):
-        return self.match_next_tokens_to_any(AND, OR, BOOLEAN, NOT)
+        return self.match_next_tokens_to_any(AND, OR, BOOLEAN, NOT, NOT_EQUAL, GREATER_THAN, GREATER_THAN_OR_EQUAL,
+                                             LESS_THAN, LESS_THAN_OR_EQUAL, IS_EQUAL)
 
     def is_next_expr(self):
-        return self.match_next_tokens_to_any(MULT, DIV, FLOAT_DIV, MINUS, PLUS, ID)
+        return self.match_next_tokens_to_any(MULT, DIV, FLOAT_DIV, MINUS, PLUS, ID, INTEGER, FLOAT)
 
     def is_next_str_expr(self):
         return self.match_next_tokens_to_any(STRING)
@@ -308,20 +310,57 @@ class Parser:
         elif self.is_next_expr():
             return self.expr()
 
+        print(self.lexer.get_current_token())
         self.error("can't decide current expression type")
+
+    @staticmethod
+    def is_boolean_token_type(token_type):
+        return token_type in (
+            OR, AND, GREATER_THAN, GREATER_THAN_OR_EQUAL, LESS_THAN, LESS_THAN_OR_EQUAL, NOT_EQUAL, IS_EQUAL)
 
     def bool_expr(self):
         #  bool_expr: bool_term ((OR, AND) bool_term)*
         bool_term = self.bool_term()
         while self.lexer.get_current_token().type in (OR, AND):
-            op = self.lexer.get_current_token()
+            op: Token = self.lexer.get_current_token()
             self.lexer.go_forward()
-            bool_term = BoolOp(bool_term, op, self.bool_term())
+            if op.type is OR:
+                bool_term = BoolOr(bool_term, self.bool_term())
+            elif op.type is AND:
+                bool_term = BoolAnd(bool_term, self.bool_term())
+            else:
+                self.error('not supported boolean token')
 
         return bool_term
 
     def bool_term(self):
-        #  bool_term: NOT bool_term | LPARENT bool_expr RPARENT | TRUE | FALSE
+        # bool_term: bool_factor ((>, >=, <, <=, !=, ==) bool_factor)*
+        bool_factor = self.bool_factor()
+        while self.lexer.get_current_token().type in (
+                GREATER_THAN, GREATER_THAN_OR_EQUAL, LESS_THAN, LESS_THAN_OR_EQUAL, NOT_EQUAL, IS_EQUAL):
+
+            op: Token = self.lexer.get_current_token()
+            self.lexer.go_forward()
+
+            if op.type is NOT_EQUAL:
+                bool_factor = BoolNotEqual(bool_factor, self.bool_factor())
+            elif op.type is GREATER_THAN:
+                bool_factor = BoolGreaterThan(bool_factor, self.bool_factor())
+            elif op.type is GREATER_THAN_OR_EQUAL:
+                bool_factor = BoolGreaterThanOrEqual(bool_factor, self.bool_factor())
+            elif op.type is LESS_THAN:
+                bool_factor = BoolLessThan(bool_factor, self.bool_factor())
+            elif op.type is LESS_THAN_OR_EQUAL:
+                bool_factor = BoolLessThanOrEqual(bool_factor, self.bool_factor())
+            elif op.type is IS_EQUAL:
+                bool_factor = BoolIsEqual(bool_factor, self.bool_factor())
+            else:
+                self.error('not supported boolean token')
+
+        return bool_factor
+
+    def bool_factor(self):
+        #  bool_term: NOT bool_term | LPARENT bool_expr RPARENT | TRUE | FALSE | ID | function_call
         token = self.lexer.get_current_token()
         if token.type is NOT:
             self.match(NOT)
@@ -337,6 +376,14 @@ class Parser:
         if token.type is ID:
             self.match(ID)
             return Var(token)
+
+        if token.type is INTEGER:
+            self.match(INTEGER)
+            return Num(token)
+
+        if token.type is FLOAT:
+            self.match(FLOAT)
+            return Num(token)
 
         if token.type is LPARENT:
             self.match(LPARENT)

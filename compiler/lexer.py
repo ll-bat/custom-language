@@ -245,11 +245,6 @@ class Lexer(object):
             self.advance()
             self.current_token = Token(SEMI, SEMI)
             return self.current_token
-        elif cur_char == "=":
-            # ASSIGNMENT
-            self.advance()
-            self.current_token = Token(ASSIGN, ASSIGN)
-            return self.current_token
         elif self.next_characters_are("{{"):
             self.skip_comment()
             return self.get_next_token()
@@ -268,6 +263,35 @@ class Lexer(object):
         elif cur_char == ',':
             self.advance()
             self.current_token = Token(COMMA, COMMA)
+            return self.current_token
+        elif self.next_characters_are("!="):
+            self.advance(2)
+            self.current_token = Token(NOT_EQUAL, NOT_EQUAL)
+            return self.current_token
+        elif self.next_characters_are(">="):
+            self.advance(2)
+            self.current_token = Token(GREATER_THAN_OR_EQUAL, GREATER_THAN_OR_EQUAL)
+            return self.current_token
+        elif self.next_characters_are("<="):
+            self.advance(2)
+            self.current_token = Token(LESS_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL)
+            return self.current_token
+        elif cur_char == ">":
+            self.advance()
+            self.current_token = Token(GREATER_THAN, GREATER_THAN)
+            return self.current_token
+        elif cur_char == "<":
+            self.advance()
+            self.current_token = Token(LESS_THAN, LESS_THAN)
+            return self.current_token
+        elif self.next_characters_are('=='):
+            self.advance(2)
+            self.current_token = Token(IS_EQUAL, IS_EQUAL)
+            return self.current_token
+        elif cur_char == "=":
+            # ASSIGNMENT
+            self.advance()
+            self.current_token = Token(ASSIGN, ASSIGN)
             return self.current_token
         elif cur_char == "!":
             self.advance()

@@ -1,7 +1,6 @@
 from typing import List
 from utils.errors import InterpreterError, ErrorCode
-from system.builtin_functions.main import is_system_function, call_system_function, evaluate_bool_expression, not_bool, \
-    is_val_of_type
+from system.builtin_functions.main import *
 from compiler.scopes import NestedScopeable
 from compiler.symbol_table import SymbolTable
 from utils.data_classes import *
@@ -150,15 +149,55 @@ class Interpreter(NodeVisitor, NestedScopeable):
     def visit_BooleanSymbol(node: BooleanSymbol):
         return node.value
 
-    def visit_BoolOp(self, node: BoolOp):
-        left = self.visit(node.left)
-        op = node.op.value
-        right = self.visit(node.right)
-        return evaluate_bool_expression(left, op, right)
+    # def visit_BoolOp(self, node: BoolOp):
+    #     left = self.visit(node.left)
+    #     op = node.op.value
+    #     right = self.visit(node.right)
+    #     return evaluate_bool_expression(left, op, right)
 
     def visit_NotOp(self, node: NotOp):
         val = self.visit(node.expr)
         return not_bool(val)
+
+    def visit_BoolNotEqual(self, node: BoolNotEqual):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        return not_equal(left, right)
+
+    def visit_BoolOr(self, node: BoolOr):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        return bool_or(left, right)
+
+    def visit_BoolAnd(self, node: BoolAnd):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        return bool_and(left, right)
+
+    def visit_BoolGreaterThan(self, node: BoolGreaterThan):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        return bool_greater_than(left, right)
+
+    def visit_BoolGreaterThanOrEqual(self, node: BoolGreaterThanOrEqual):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        return bool_greater_than_or_equal(left, right)
+
+    def visit_BoolLessThan(self, node: BoolLessThan):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        return bool_less_than(left, right)
+
+    def visit_BoolLessThanOrEqual(self, node: BoolLessThanOrEqual):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        return bool_less_than_or_equal(left, right)
+
+    def visit_BoolIsEqual(self, node: BoolIsEqual):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        return bool_is_equal(left, right)
 
     @staticmethod
     def visit_NoneType(node):

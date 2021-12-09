@@ -232,19 +232,58 @@ class BuiltinTypeSymbol(Symbol):
         super().__init__(name)
 
 
-class BoolOp(AST):
-    def __init__(self, left, op: Token, right):
-        self.left = left
-        self.op = self.token = op
-        self.right = right
-
-    def __str__(self):
-        return f'BoolOp({self.left}, {self.op}, {self.right})'
-
-
 class NotOp(AST):
     def __init__(self, expr):
         self.expr = expr
 
     def __str__(self):
         return f'NotOp({self.expr})'
+
+
+class BoolOp(AST):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def __str__(self):
+        return f'{self.__class__.__name__}({self.left}, {self.right})'
+
+
+class BoolOr(BoolOp):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+
+
+class BoolAnd(BoolOp):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+
+
+class BoolNotEqual(BoolOp):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+
+
+class BoolGreaterThan(BoolOp):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+
+
+class BoolGreaterThanOrEqual(BoolOp):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+
+
+class BoolLessThan(BoolOp):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+
+
+class BoolLessThanOrEqual(BoolOp):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+
+
+class BoolIsEqual(BoolOp):
+    def __init__(self, left, right):
+        super().__init__(left, right)

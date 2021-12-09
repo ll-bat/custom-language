@@ -7,25 +7,30 @@ try:
     string = """
         PROGRAM Part10
         {
-            var x : integer;
-            var s : string;
-            var r : real;
-            var b : boolean;
+            var x : boolean;
+            var y : boolean; 
+            
+            x = true; 
+            y = false; 
             
             function foo() {
-                return 1;
+                return true;
             }
             
-            function say(s : string) {
-                return s;
+            x = x or y and foo();
+            
+            print(x);
+            
+            
+            var s : string;
+            
+            function bar() {
+                return "bar";
             }
             
-            x = foo();
-            s = say("something");
-            r = 1.5;
-            b = true;
+            s = "foo" + bar();
             
-            print(x, s, r, b);            
+            print(s);
         }  
     """
 

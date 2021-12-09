@@ -70,6 +70,17 @@ class Parser:
         self.lexer.use_saved_state()
         return state
 
+    def match_next_tokens_to_any(self, *token_types):
+        self.lexer.save_current_state()
+        while self.lexer.get_current_token().type is not SEMI:
+            token = self.lexer.get_current_token()
+            if token.type in token_types:
+                self.lexer.use_saved_state()
+                return True
+            self.lexer.go_forward()
+        self.lexer.use_saved_state()
+        return False
+
     def program(self):
         self.match(PROGRAM)
         self.variable()
@@ -277,14 +288,27 @@ class Parser:
         base_expr = self.base_expr()
         return Assign(var, Token(ASSIGN, Assign), base_expr)
 
+    def is_next_function_call(self):
+        return self.next_tokens_are(ID, LPARENT)
+
+    def is_next_bool_expr(self):
+        return self.match_next_tokens_to_any(AND, OR, BOOLEAN, NOT)
+
+    def is_next_expr(self):
+        return self.match_next_tokens_to_any(MULT, DIV, FLOAT_DIV, MINUS, PLUS, ID)
+
+    def is_next_str_expr(self):
+        return self.match_next_tokens_to_any(STRING)
+
     def base_expr(self):
-        token = self.lexer.get_current_token()
-        if token.type is STRING:
+        if self.is_next_str_expr():
             return self.str_expr()
-        elif self.next_tokens_are(NOT) or self.next_tokens_are(BOOLEAN):
+        elif self.is_next_bool_expr():
             return self.bool_expr()
-        else:
+        elif self.is_next_expr():
             return self.expr()
+
+        self.error("can't decide current expression type")
 
     def bool_expr(self):
         #  bool_expr: bool_term ((OR, AND) bool_term)*
@@ -307,6 +331,13 @@ class Parser:
             self.match(BOOLEAN)
             return BooleanSymbol(token.value)
 
+        if self.is_next_function_call():
+            return self.function_call()
+
+        if token.type is ID:
+            self.match(ID)
+            return Var(token)
+
         if token.type is LPARENT:
             self.match(LPARENT)
             node = self.bool_expr()
@@ -319,6 +350,8 @@ class Parser:
         var = self.lexer.current_token
         if var.type is STRING:
             var = Str(var)
+        elif self.is_next_function_call():
+            return self.function_call()
         elif var.type is ID:
             var = Var(var)
         else:

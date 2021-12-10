@@ -50,7 +50,7 @@ class Lexer(object):
     def get_position(self):
         return self.pos
 
-    def get_current_token(self):
+    def get_current_token(self) -> Token:
         return self.current_token
 
     def peek_next_token(self):
@@ -225,6 +225,18 @@ class Lexer(object):
         elif self.next_characters_are("and"):
             self.advance(3)
             self.current_token = Token(AND, AND)
+            return self.current_token
+        elif self.next_characters_are("if"):
+            self.advance(2)
+            self.current_token = Token(IF, IF)
+            return self.current_token
+        elif self.next_characters_are("elif"):
+            self.advance(4)
+            self.current_token = Token(ELIF, ELIF)
+            return self.current_token
+        elif self.next_characters_are("else"):
+            self.advance(4)
+            self.current_token = Token(ELSE, ELSE)
             return self.current_token
         elif cur_char.isalpha():
             # ID

@@ -7,32 +7,31 @@ try:
     string = """
         PROGRAM Part10
         {
-            var a : real; 
-            var b : boolean;
+            var x : integer; 
             
-            function foo() {
-                return true;
+            x = 6;
+            
+            if x > 5
+            {
+                print("x is greater than 5");
+            }
+            if x > 5
+            {
+                print("x is greater than 5");
+            }
+            elif x < 5
+            {
+                print("x is less than 5");
+            }
+            else 
+            {
+                print("x equals to 5");
             }
             
-            function bar() {
-                return 1 > 2;
+            if true and !false
+            {
+                print("hi");
             }
-            
-            b = foo() or bar();
-            print(b);
-            
-            b = foo() != bar();
-            print(b);
-            
-            b = 1 < 2 and 2 > 1 and (foo() or bar());
-            print(b);
-            
-            print("1 > 2", 1 > 2);
-            print("1 == 2", 1 == 2);
-            print("1 != 2", 1 != 2);
-            print("1 >= 2", 1 >= 2);
-            print("1 <= 2", 1 <= 2);
-            
         }  
     """
 

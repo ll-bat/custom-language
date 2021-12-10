@@ -161,5 +161,15 @@ class SemanticAnalyzer(NodeVisitor):
         self.visit(node.left)
         self.visit(node.right)
 
+    def visit_IfBlock(self, node: IfBlock):
+        self.visit(node.block)
+        self.visit(node.expr)
+
+    def visit_IfStat(self, node: IfStat):
+        for if_block in node.if_blocks:
+            self.visit(if_block)
+        if node.else_block is not None:
+            self.visit(node.else_block)
+
     def analyze(self):
         return self.visit(self.tree)

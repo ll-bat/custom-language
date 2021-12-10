@@ -199,6 +199,23 @@ class Interpreter(NodeVisitor, NestedScopeable):
         right = self.visit(node.right)
         return bool_is_equal(left, right)
 
+    def visit_IfBlock(self, node: IfBlock):
+        flag = self.visit(node.expr)
+        if flag is TRUE:
+            self.define_new_scope()
+            self.visit(node.block)
+            self.destroy_current_scope()
+            return True
+        return False
+
+    def visit_IfStat(self, node: IfStat):
+        for if_block in node.if_blocks:
+            visited: bool = self.visit(if_block)
+            if visited is True:
+                return
+        if node.else_block is not None:
+            self.visit(node.else_block)
+
     @staticmethod
     def visit_NoneType(node):
         return None

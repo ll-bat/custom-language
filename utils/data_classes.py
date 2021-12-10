@@ -1,5 +1,6 @@
 import abc
 from enum import Enum
+from typing import List
 
 
 class SymbolTypes(Enum):
@@ -287,3 +288,24 @@ class BoolLessThanOrEqual(BoolOp):
 class BoolIsEqual(BoolOp):
     def __init__(self, left, right):
         super().__init__(left, right)
+
+
+class IfBlock(AST):
+    def __init__(self, expr, block):
+        self.expr = expr
+        self.block = block
+
+    def __str__(self):
+        return f'IfBlock({self.expr}, {self.block})'
+
+
+class IfStat(AST):
+    def __init__(self, if_blocks: List, else_block):
+        self.if_blocks = if_blocks
+        self.else_block = else_block
+
+    def __str__(self):
+        stats = ""
+        for if_block in self.if_blocks:
+            stats += str(if_block) + ","
+        return f'IfStat({stats}, {self.else_block})'

@@ -21,7 +21,9 @@ class Parser:
     base_type: INTEGER | REAL | STRING | BOOLEAN
     compound_statement: statement_list
     statement_list: statement (SEMI statement)*
-    statement: assignment_statement | function_call | declarations | empty
+    statement: assignment_statement
+        | function_call | declarations | if_statement
+        | empty
     function_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT SEMI
     empty:
     assignment_statement: variable ASSIGN base_expr
@@ -217,8 +219,14 @@ class Parser:
 
         return compound
 
+    def is_if_statement(self):
+        return self.next_tokens_are(IF)
+
     def is_compound_statement(self):
-        return self.is_function_call() or self.is_assignment() or self.is_declaration()
+        return self.is_function_call()\
+               or self.is_assignment() \
+               or self.is_declaration() \
+               or self.is_if_statement()
 
     def statement_list(self):
         children = []
@@ -255,6 +263,8 @@ class Parser:
         elif self.is_declaration():
             # variable or function declaration
             return self.declarations()
+        elif self.is_if_statement():
+            return self.if_statement()
         elif token.type in (RCBRACE, RETURN):
             # compound_statement finished here
             # we use a trick here
@@ -262,6 +272,22 @@ class Parser:
             return self.emtpy()
 
         self.error("should be ID or LPARENT, got {}".format(token))
+
+    def if_statement(self):
+        self.match(IF)
+        bool_expr = self.bool_expr()
+        block = self.block()
+        if_blocks = [IfBlock(bool_expr, block)]
+        else_block = None
+        while self.lexer.get_current_token().type is ELIF:
+            self.match(ELIF)
+            bool_expr = self.bool_expr()
+            block = self.block()
+            if_blocks.append(IfBlock(bool_expr, block))
+        if self.lexer.get_current_token().type is ELSE:
+            self.match(ELSE)
+            else_block = self.block()
+        return IfStat(if_blocks, else_block)
 
     def function_call(self):
         """

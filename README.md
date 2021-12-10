@@ -62,6 +62,33 @@
 ```
 
 
+#### If statement
+```python
+    x = 10 
+    if x > 5 
+    {
+        print("x is greater than 5");
+    }
+    elif x < 5
+    {
+        print("x is less than 5")
+    }
+    else
+    {
+        print("x equals to 5")
+    }
+
+    if true or false
+    {
+        print("true")
+    }
+    
+    if true and !false
+    {
+        print("true")
+    }
+```
+
 #### Comments 
 ```
     // This is one line comment 

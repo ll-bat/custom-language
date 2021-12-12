@@ -66,8 +66,10 @@ class Lexer(object):
         self.get_next_token()
 
     def get_character(self, pos):
-        if pos >= len(self.text):
+        if pos == len(self.text):
             return None
+        if pos > len(self.text):
+            raise Exception('no characters left')
         return self.text[pos]
 
     def get_current_character(self) -> str:

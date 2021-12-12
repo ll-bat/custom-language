@@ -19,4 +19,6 @@ RESERVED_KEYWORDS = {
     BOOLEAN: Token(BOOLEAN, BOOLEAN),
     TRUE: Token(BOOLEAN, TRUE),
     FALSE: Token(BOOLEAN, FALSE),
+    FOR: Token(FOR, FOR),
+    BREAK: Token(BREAK, BREAK),
 }

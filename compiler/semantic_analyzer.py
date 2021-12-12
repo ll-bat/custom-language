@@ -171,5 +171,20 @@ class SemanticAnalyzer(NodeVisitor):
         if node.else_block is not None:
             self.visit(node.else_block)
 
+    def visit_ForLoop(self, node: ForLoop):
+        base = node.base
+        var = base.left.value
+        self.symbol_table.define(Symbol(var, None))
+        self.visit(node.base)
+        self.visit(node.bool_expr)
+        self.visit(node.then)
+        self.visit(node.block)
+
+    def visit_Break(self, node):
+        pass
+
+    def visit_NoneType(self, node):
+        pass
+
     def analyze(self):
         return self.visit(self.tree)

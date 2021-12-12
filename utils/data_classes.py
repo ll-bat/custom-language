@@ -309,3 +309,45 @@ class IfStat(AST):
         for if_block in self.if_blocks:
             stats += str(if_block) + ","
         return f'IfStat({stats}, {self.else_block})'
+
+
+class ForLoop(AST):
+    def __init__(self, base: Assign, bool_expr, then, block: Block):
+        self.base = base
+        self.bool_expr = bool_expr
+        self.then = then
+        self.block = block
+
+    def __str__(self):
+        return f'ForLoop({self.base}, {self.bool_expr}, {self.then}, {self.block})'
+
+
+class Break(AST):
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return f'Break()'
+
+
+class Breakable(abc.ABC):
+    def is_terminated(self):
+        raise Exception('is_terminated() should be implemented in child class')
+
+
+class Countable:
+    recursion_counter = 0
+
+    def count_recursion(self):
+        self.recursion_counter += 1
+
+    def get_recursion_count(self):
+        return self.recursion_counter
+
+
+class BeforeNodeVisitor(NodeVisitor, Breakable, Countable):
+    def visit(self, node):
+        if self.is_terminated():
+            return None
+        self.count_recursion()
+        return super().visit(node)

@@ -1,5 +1,3 @@
-from typing import List
-
 from compiler.lexer import Lexer
 from utils.constants import *
 from utils.data_classes import *
@@ -22,8 +20,8 @@ class Parser:
     compound_statement: statement_list
     statement_list: statement (SEMI statement)*
     statement: assignment_statement
-        | function_call | declarations | if_statement
-        | empty
+        | function_call | declarations | if_statement | for_loop
+        | empty | BREAK
     function_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT SEMI
     empty:
     assignment_statement: variable ASSIGN base_expr
@@ -41,7 +39,12 @@ class Parser:
     def __init__(self, text):
         self.lexer = Lexer(text)
 
+    @staticmethod
+    def emtpy():
+        return NoOp()
+
     def print_surrounding_tokens(self):
+        self.lexer.save_current_state()
         print("surrounding tokens")
         print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         for i in range(5):
@@ -49,12 +52,14 @@ class Parser:
                 print(self.lexer.get_current_token())
                 self.lexer.go_forward()
         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        self.lexer.use_saved_state()
 
     def is_function_call(self):
         return self.next_tokens_are(ID, LPARENT)
 
     def is_assignment(self):
-        return self.next_tokens_are(ID, ASSIGN)
+        flag = self.next_tokens_are(ID, ASSIGN)
+        return flag
 
     def is_declaration(self):
         token = self.lexer.get_current_token()
@@ -75,7 +80,9 @@ class Parser:
 
     def match_next_tokens_to_any(self, *token_types):
         self.lexer.save_current_state()
-        while self.lexer.get_current_token().type is not SEMI:
+        token = self.lexer.get_current_token()
+        while token.type is not SEMI and token.type is not LCBRACE and token.type is not EOF \
+                and (token.type is not EOF):
             token = self.lexer.get_current_token()
             if token.type in token_types:
                 self.lexer.use_saved_state()
@@ -222,11 +229,19 @@ class Parser:
     def is_if_statement(self):
         return self.next_tokens_are(IF)
 
+    def is_for_loop(self):
+        return self.next_tokens_are(FOR)
+
+    def is_break(self):
+        return self.next_tokens_are(BREAK)
+
     def is_compound_statement(self):
         return self.is_function_call()\
                or self.is_assignment() \
                or self.is_declaration() \
-               or self.is_if_statement()
+               or self.is_if_statement() \
+               or self.is_for_loop() \
+               or self.is_break()
 
     def statement_list(self):
         children = []
@@ -264,7 +279,15 @@ class Parser:
             # variable or function declaration
             return self.declarations()
         elif self.is_if_statement():
+            #
             return self.if_statement()
+        elif self.is_for_loop():
+            #
+            return self.for_loop()
+        elif self.is_break():
+            self.match(BREAK)
+            self.match(SEMI)
+            return Break()
         elif token.type in (RCBRACE, RETURN):
             # compound_statement finished here
             # we use a trick here
@@ -272,6 +295,16 @@ class Parser:
             return self.emtpy()
 
         self.error("should be ID or LPARENT, got {}".format(token))
+
+    def for_loop(self):
+        self.match(FOR)
+        base = self.assignment_statement()
+        self.match(SEMI)
+        bool_expr = self.bool_expr()
+        self.match(SEMI)
+        then = self.assignment_statement()
+        block = self.block()
+        return ForLoop(base, bool_expr, then, block)
 
     def if_statement(self):
         self.match(IF)
@@ -326,7 +359,8 @@ class Parser:
         return self.match_next_tokens_to_any(MULT, DIV, FLOAT_DIV, MINUS, PLUS, ID, INTEGER, FLOAT)
 
     def is_next_str_expr(self):
-        return self.match_next_tokens_to_any(STRING)
+        node = self.match_next_tokens_to_any(STRING)
+        return node
 
     def base_expr(self):
         if self.is_next_str_expr():
@@ -436,10 +470,6 @@ class Parser:
             var = StrOp(var, Token(PLUS, PLUS), self.str_expr())
 
         return var
-
-    @staticmethod
-    def emtpy():
-        return NoOp()
 
     def variable(self):
         token = self.lexer.get_current_token()

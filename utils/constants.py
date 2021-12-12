@@ -34,4 +34,6 @@ IS_EQUAL = "IS_EQUAL"
 IF = "IF"
 ELIF = "ELIF"
 ELSE = "ELSE"
-
+FOR = "FOR"
+BREAK = "BREAK"
+MAX_INT = 1e7

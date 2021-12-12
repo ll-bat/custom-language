@@ -1,19 +1,23 @@
-from typing import List
-from utils.errors import InterpreterError, ErrorCode
-from system.builtin_functions.main import *
 from compiler.scopes import NestedScopeable
 from compiler.symbol_table import SymbolTable
-from utils.data_classes import *
+from system.builtin_functions.main import *
 from utils.constants import *
+from utils.data_classes import *
+from utils.errors import InterpreterError, ErrorCode
 
 
-class Interpreter(NodeVisitor, NestedScopeable):
+class Interpreter(BeforeNodeVisitor, NestedScopeable):
     def __init__(self, tree):
+        self.call_stack = list()
+        self.terminated_call_stack = list()
         self.tree = tree
         super().__init__(SymbolTable())
 
     def error(self, message):
         raise InterpreterError(ErrorCode.INTERPRETER_ERROR, message)
+
+    def is_terminated(self):
+        return len(self.terminated_call_stack) > 0
 
     def visit_BinOp(self, node: BinOp):
         left = self.visit(node.left)
@@ -215,6 +219,69 @@ class Interpreter(NodeVisitor, NestedScopeable):
                 return
         if node.else_block is not None:
             self.visit(node.else_block)
+
+    def visit_Break(self, node: Break):
+        if len(self.call_stack) < 1:
+            self.error("Break is used outside of for-loop (0 len)")
+        last_node = self.call_stack[-1]
+        if last_node is not FOR:
+            self.error("Break is used outside of for-loop")
+        self.terminated_call_stack.append(last_node)
+        return None
+
+    def visit_ForLoop(self, node: ForLoop):
+        def before_for_loop():
+            self.define_new_scope()
+            base: Assign = node.base
+            # var i e.i i
+            var = base.left.value
+            # i = 5 e.i 5
+            val = self.visit(base.right)
+            # save new var in symbol table
+            self.symbol_table.define(Symbol(var, val, FLOAT))
+
+        def run_loop():
+
+            def before_loop():
+                self.call_stack.append(FOR)
+
+            def can_loop():
+                if len(self.terminated_call_stack) > 0 and self.terminated_call_stack[-1] is FOR:
+                    self.terminated_call_stack.pop()
+                    return False
+
+                return self.visit(node.bool_expr) is TRUE
+
+            def loop():
+                self.visit(node.block)
+                self.visit(node.then)
+
+            def after_loop():
+                last_node = self.call_stack.pop()
+                if last_node is not FOR:
+                    self.error("Something illegal happened in ForLoop")
+
+            def too_much_call_check(counter):
+                if counter + 1 > MAX_INT:
+                    self.error("too much calls from while")
+
+            cnt = 0
+            before_loop()
+            while can_loop():
+                loop()
+                cnt += 1
+                too_much_call_check(cnt)
+
+            after_loop()
+
+        def after_for_loop():
+            self.destroy_current_scope()
+
+        before_for_loop()
+        run_loop()
+        after_for_loop()
+
+        return None
 
     @staticmethod
     def visit_NoneType(node):

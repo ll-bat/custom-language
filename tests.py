@@ -2,36 +2,18 @@ from compiler.parser import Parser
 from compiler.interpreter import Interpreter
 from utils.errors import *
 from compiler.semantic_analyzer import SemanticAnalyzer
-
 try:
     string = """
         PROGRAM Part10
         {
-            var x : integer; 
+            var sum : integer; 
+            var cnt : integer; 
+            sum = 0;
+            cnt = 0;
             
-            x = 6;
+            for i = 0; i < 1000; i = i + 1 {
+            }   
             
-            if x > 5
-            {
-                print("x is greater than 5");
-            }
-            if x > 5
-            {
-                print("x is greater than 5");
-            }
-            elif x < 5
-            {
-                print("x is less than 5");
-            }
-            else 
-            {
-                print("x equals to 5");
-            }
-            
-            if true and !false
-            {
-                print("hi");
-            }
         }  
     """
 
@@ -51,6 +33,7 @@ try:
     # interpret language
     interpreter = Interpreter(tree)
     interpreter.interpret()
+    print(interpreter.get_recursion_count())
 except (ParserError, SemanticError, LexerError) as ex:
     print(ex)
 except Exception as e:

@@ -1,4 +1,4 @@
-from utils.constants import TRUE, FALSE, OR, AND, INTEGER, REAL, STRING, BOOLEAN
+from utils.constants import TRUE, FALSE, OR, AND, INTEGER, REAL, STRING, BOOLEAN, FLOAT
 
 _delta_for_floats = 1 / 1e8
 
@@ -54,13 +54,13 @@ def not_bool(bool_val):
 
 
 def is_val_of_type(val, base_type):
-    if base_type not in (INTEGER, REAL, STRING, BOOLEAN):
+    if base_type not in (INTEGER, FLOAT, STRING, BOOLEAN):
         raise ValueError('base_type must be int,str,bool or real type')
 
     if val is None:
         return True
 
-    if base_type in (INTEGER, REAL):
+    if base_type in (INTEGER, FLOAT):
         if base_type == INTEGER:
             try:
                 return isinstance(int(val), int) and str(val).count('.') == 0

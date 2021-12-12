@@ -33,7 +33,7 @@ try:
     # interpret language
     interpreter = Interpreter(tree)
     interpreter.interpret()
-    print(interpreter.get_recursion_count())
+    # print(interpreter.get_recursion_count())
 except (ParserError, SemanticError, LexerError) as ex:
     print(ex)
 except Exception as e:

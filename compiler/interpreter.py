@@ -63,18 +63,25 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
         for sub_node in node.get_children():
             self.visit(sub_node)
 
+    @staticmethod
+    def can_assign(base_type, value):
+        return is_val_of_type(value, base_type)
+
+    def can_not_assign_error(self, var_name, value, base_type):
+        self.error(
+            "can't assign {} to var {} as type of {} is {}".format(value, var_name, var_name, base_type))
+
     def visit_Assign(self, node: Assign):
         var_name = node.left.value
-        expr = self.visit(node.right)
+        value = self.visit(node.right)
 
         if self.symbol_table.is_defined(var_name):
             # type checking
             symbol: Symbol = self.symbol_table.lookup(var_name)
             base_type = symbol.type
-            if not is_val_of_type(expr, base_type):
-                self.error(
-                    "can't assign {} to var {} as type of {} is {}".format(expr, symbol.name, symbol.name, base_type))
-            return self.symbol_table.assign(var_name, Symbol(var_name, expr, base_type))
+            if not self.can_assign(base_type, value):
+                self.can_not_assign_error(var_name, value, symbol.type)
+            return self.symbol_table.assign(var_name, Symbol(var_name, value, base_type))
         else:
             raise ValueError(f"value {var_name} is not defined")
 
@@ -109,10 +116,16 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
 
     def visit_VarDecs(self, node: VarDecs):
         declarations = node.get_declarations()
-        symbol_type = node.get_type()
-        # print(symbol_type)
+        base_type = node.get_type().value
+        val = self.visit(node.get_value())
+
+        if val is not None:
+            if not self.can_assign(base_type, val):
+                self.can_not_assign_error(node.get_var_names(), val, base_type)
+
+        # print(base_type)
         for var in declarations:
-            symbol = VarSymbol(var.value, symbol_type.value, symbol_type.value)
+            symbol = VarSymbol(var.value, val, base_type)
             self.symbol_table.define(symbol)
 
     def visit_VarSymbol(self, node: VarSymbol):

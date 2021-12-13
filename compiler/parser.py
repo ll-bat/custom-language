@@ -15,7 +15,7 @@ class Parser:
         | empty
     formal_parameter_list: formal_parameter (SEMI format_parameter)*
     format_parameter: ID (COMMA ID)* COLON integer_type
-    variable_declaration: ID (COMMA, ID)* COLON base_type
+    variable_declaration: ID (COMMA, ID)* COLON base_type (ASSIGN base_expr)?
     base_type: INTEGER | REAL | STRING | BOOLEAN
     compound_statement: statement_list
     statement_list: statement (SEMI statement)*
@@ -64,6 +64,9 @@ class Parser:
     def is_declaration(self):
         token = self.lexer.get_current_token()
         return token.type in (VAR, FUNCTION)
+
+    def next_token_is(self, token_type):
+        return self.next_tokens_are(token_type)
 
     def next_tokens_are(self, *args):
         self.lexer.save_current_state()
@@ -200,7 +203,13 @@ class Parser:
 
         self.match(COLON)
         base_type = self.base_type()
-        return VarDecs(variables, base_type)
+
+        val = None
+        if self.next_token_is(ASSIGN):
+            self.match(ASSIGN)
+            val = self.base_expr()
+
+        return VarDecs(variables, base_type, val)
 
     def base_type(self):
         token = self.lexer.get_current_token()

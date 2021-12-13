@@ -76,9 +76,10 @@ class SemanticAnalyzer(NodeVisitor):
     def visit_VarDecs(self, node: VarDecs):
         declarations = node.get_declarations()
         symbol_type = node.get_type()
+        val = node.get_value()
         # print(symbol_type)
         for var in declarations:
-            symbol = VarSymbol(var.value, symbol_type.value)
+            symbol = VarSymbol(var.value, val, symbol_type.value)
             self.symbol_table.define(symbol)
 
     def visit_VarSymbol(self, node: VarSymbol):

@@ -129,9 +129,10 @@ class NoOp(AST):
 
 
 class VarDecs(AST):
-    def __init__(self, variables, base_type: Token):
+    def __init__(self, variables, base_type: Token, value=None):
         self.variables = variables
         self.token = self.type = base_type
+        self.value = value
 
     def get_declarations(self):
         return self.variables
@@ -139,11 +140,17 @@ class VarDecs(AST):
     def get_type(self) -> Token:
         return self.type
 
+    def get_value(self):
+        return self.value
+
+    def get_var_names(self):
+        return ", ".join([token.value for token in self.variables])
+
     def __str__(self):
         res = ""
         for var in self.variables:
             res += var.value + ', '
-        return f'VarDecs(({res}), {self.type.value})'
+        return f'VarDecs(({res}), {self.type.value}, {self.value})'
 
 
 class Program(AST):

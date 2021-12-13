@@ -17,6 +17,9 @@
     var s    : real; 
     var c    : string;
     var f    : boolean;
+    
+    var a1   : integer = 5;
+    var c, s : string = "same values"
 ```
 
 ##### Assignment statements 

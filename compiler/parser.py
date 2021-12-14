@@ -14,9 +14,9 @@ class Parser:
         | FUNCTION ID (LPARENT formal_parameter_list RPARENT)? block
         | empty
     formal_parameter_list: formal_parameter (SEMI format_parameter)*
-    format_parameter: ID (COMMA ID)* COLON integer_type
+    format_parameter: ID (COMMA ID)* COLON base_type
     variable_declaration: ID (COMMA, ID)* COLON base_type (ASSIGN base_expr)?
-    base_type: INTEGER | REAL | STRING | BOOLEAN
+    base_type: INTEGER | REAL | STRING | BOOLEAN | OBJECT
     compound_statement: statement_list
     statement_list: statement (SEMI statement)*
     statement: assignment_statement
@@ -213,11 +213,11 @@ class Parser:
 
     def base_type(self):
         token = self.lexer.get_current_token()
-        if token.type in (INTEGER, REAL, STRING, BOOLEAN):
+        if token.type in (INTEGER, REAL, STRING, BOOLEAN, OBJECT):
             self.lexer.go_forward()
             return token
 
-        self.error('should be integer|real|string|boolean, got ' + token.type)
+        self.error('should be integer|real|string|boolean|object, got ' + token.type)
 
     def integer_type(self):
         token = self.lexer.get_current_token()

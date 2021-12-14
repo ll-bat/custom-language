@@ -278,6 +278,10 @@ class Lexer(object):
             self.advance()
             self.current_token = Token(COMMA, COMMA)
             return self.current_token
+        elif cur_char == '.':
+            self.advance()
+            self.current_token = Token(DOT, DOT)
+            return self.current_token
         elif self.next_characters_are("!="):
             self.advance(2)
             self.current_token = Token(NOT_EQUAL, NOT_EQUAL)

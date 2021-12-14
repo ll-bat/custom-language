@@ -21,4 +21,5 @@ RESERVED_KEYWORDS = {
     FALSE: Token(BOOLEAN, FALSE),
     FOR: Token(FOR, FOR),
     BREAK: Token(BREAK, BREAK),
+    OBJECT: Token(OBJECT, OBJECT),
 }

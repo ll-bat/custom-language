@@ -6,10 +6,11 @@ try:
     string = """
         PROGRAM Part10
         {
-            var sum : integer = "something"; 
-            var cnt : integer = 0; 
-                
-            print(sum, cnt);        
+            var s : string; 
+            
+            s = "something";
+            
+            print(s);            
         }  
     """
 

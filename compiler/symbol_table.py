@@ -10,10 +10,6 @@ class SymbolTable:
     def get_symbols(self):
         return self._symbols
 
-    def defineBuiltinTypeSymbols(self):
-        self.define(Symbol(INTEGER))
-        self.define(Symbol(REAL))
-
     def define(self, symbol: AbstractSymbol):
         self._symbols[symbol.name] = symbol
 

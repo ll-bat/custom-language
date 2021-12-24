@@ -1,0 +1,11 @@
+
+PROGRAM Part10
+{
+
+  var s : string;
+
+  s = "something";
+
+  print(s);
+
+}

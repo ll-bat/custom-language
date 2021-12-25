@@ -113,20 +113,26 @@
 ```
 
 #### Program snippet
-```javascript
-    PROGRAM PartN11
-        {
-            VAR y : REAL;
-                        
-            function printSomething()
-            {
-                print(y)
-            }
-            
-            y = 1.5 * 2 + 1;
-            
-            printSomething(); // "prints 4" 
+```python
+    
+PROGRAM Part10
+{
+    function fib(n: int) {
+        if n < 1 {
+            return 0;
         }
+        elif n < 3 {
+            return 1;
+        }
+        return fib(n - 1) + fib(n - 2);
+    }
+
+
+    for i = 0; i < 10; i = i + 1 {
+        print(fib(i));
+    }
+
+}
 ```
 
 ### Currently, language does not support many features, but it's in development process 

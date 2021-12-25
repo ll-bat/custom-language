@@ -20,10 +20,11 @@ class Parser:
     compound_statement: statement_list
     statement_list: statement (SEMI statement)*
     statement: assignment_statement
-        | function_call | declarations | if_statement | for_loop
+        | function_call | return | declarations | if_statement | for_loop
         | empty | BREAK
     function_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT SEMI
     empty:
+    return: RETURN base_expr
     assignment_statement: variable ASSIGN base_expr
     base_expr: expr | str_expr | bool_expr
     bool_expr: bool_term ((OR, AND) bool_term)*
@@ -117,6 +118,8 @@ class Parser:
         if self.next_tokens_are(RETURN):
             self.match(RETURN)
             returns = self.base_expr()
+            self.match(SEMI)
+        returns = ReturnStat(returns)
         return returns
 
     def declarations(self) -> list:
@@ -142,15 +145,10 @@ class Parser:
                     self.match(RPARENT)
 
                 self.match(LCBRACE)
-
                 block = self.function_block()
-                returns = self.function_return_statement()
-                if returns is not None:
-                    self.match(SEMI)
-
                 self.match(RCBRACE)
 
-                function_decl = FunctionDecl(proc_name, parameters_list, block, returns)
+                function_decl = FunctionDecl(proc_name, parameters_list, block)
                 declarations.append(function_decl)
 
         return declarations
@@ -244,13 +242,17 @@ class Parser:
     def is_break(self):
         return self.next_tokens_are(BREAK)
 
+    def is_return_stat(self):
+        return self.next_token_is(RETURN)
+
     def is_compound_statement(self):
         return self.is_function_call()\
                or self.is_assignment() \
                or self.is_declaration() \
                or self.is_if_statement() \
                or self.is_for_loop() \
-               or self.is_break()
+               or self.is_break() \
+                or self.is_return_stat()
 
     def statement_list(self):
         children = []
@@ -297,12 +299,13 @@ class Parser:
             self.match(BREAK)
             self.match(SEMI)
             return Break()
-        elif token.type in (RCBRACE, RETURN):
-            # compound_statement finished here
-            # we use a trick here
-            # just return an emtpy token
+        elif self.is_return_stat():
+            #
+            return self.function_return_statement()
+        elif token.type == RCBRACE:
             return self.emtpy()
 
+        print(token)
         self.error("should be ID or LPARENT, got {}".format(token))
 
     def for_loop(self):

@@ -10,6 +10,7 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
     def __init__(self, tree):
         self.call_stack = list()
         self.terminated_call_stack = list()
+        self.function_return_stat_list = list()
         self.tree = tree
         super().__init__(SymbolTable())
 
@@ -157,7 +158,20 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
         block = function.block
         self.visit(block)
 
-        returns = self.visit(function.return_expression)
+        returns = None
+        if len(self.terminated_call_stack) > 0:
+            terminated_by = self.terminated_call_stack[-1]
+            if terminated_by == RETURN:
+                # we need to clear terminated_call_stack otherwise every visit call will be stopped
+                self.terminated_call_stack.pop()
+                # check if function has returned something
+                if len(self.function_return_stat_list) > 0:
+                    # take last node and remove it
+                    ret: ReturnStat = self.function_return_stat_list[-1]
+                    self.function_return_stat_list.pop()
+                    # as we save node itself, we need to evaluate it for now
+                    returns = self.visit(ret.base_expr)
+
         self.destroy_current_scope()
 
         return returns
@@ -239,7 +253,7 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
         last_node = self.call_stack[-1]
         if last_node is not FOR:
             self.error("Break is used outside of for-loop")
-        self.terminated_call_stack.append(last_node)
+        self.terminated_call_stack.append(BREAK)
         return None
 
     def visit_ForLoop(self, node: ForLoop):
@@ -259,8 +273,10 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
                 self.call_stack.append(FOR)
 
             def can_loop():
-                if len(self.terminated_call_stack) > 0 and self.terminated_call_stack[-1] is FOR:
-                    self.terminated_call_stack.pop()
+                if len(self.terminated_call_stack) > 0:
+                    if self.terminated_call_stack[-1] == BREAK:
+                        # this means "break" is used inside for-loop
+                        self.terminated_call_stack.pop()
                     return False
 
                 return self.visit(node.bool_expr) is TRUE
@@ -299,6 +315,10 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
     @staticmethod
     def visit_NoneType(node):
         return None
+
+    def visit_ReturnStat(self, node: ReturnStat):
+        self.terminated_call_stack.append(RETURN)
+        self.function_return_stat_list.append(node)
 
     def interpret(self):
         return self.visit(self.tree)

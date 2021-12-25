@@ -187,5 +187,8 @@ class SemanticAnalyzer(NodeVisitor):
     def visit_NoneType(self, node):
         pass
 
+    def visit_ReturnStat(self, node: ReturnStat):
+        pass
+
     def analyze(self):
         return self.visit(self.tree)

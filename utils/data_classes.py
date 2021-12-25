@@ -358,3 +358,11 @@ class BeforeNodeVisitor(NodeVisitor, Breakable, Countable):
             return None
         self.count_recursion()
         return super().visit(node)
+
+
+class ReturnStat(AST):
+    def __init__(self, base_expr):
+        self.base_expr = base_expr
+
+    def __str__(self):
+        return f'ReturnStat({self.base_expr})'

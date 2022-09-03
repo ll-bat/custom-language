@@ -134,7 +134,3 @@ PROGRAM Part10
 
 }
 ```
-
-### Currently, language does not support many features, but it's in development process 
-<br />
-Language is made for learning purposes

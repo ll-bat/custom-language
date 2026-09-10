@@ -14,9 +14,92 @@ class BuiltinFunctions:
             return right
         elif right is None:
             return left
-            
+
         return max(left, right)
 
+    @staticmethod
+    def min(left, right):
+        if left is None:
+            return right
+        elif right is None:
+            return left
+
+        return min(left, right)
+
+    @staticmethod
+    def abs(value):
+        if value is None:
+            return None
+
+        return abs(value)
+
+
+    @staticmethod
+    def sin(value):
+        if value is None:
+            return None
+
+        return sin(value)
+
+
+    @staticmethod
+    def cos(value):
+        if value is None:
+            return None
+
+        return cos(value)
+
+
+    @staticmethod
+    def tan(value):
+        if value is None:
+            return None
+
+        return tan(value)
+
+
+    @staticmethod
+    def sqrt(value):
+        if value is None:
+            return None
+
+        return sqrt(value)
+
+    @staticmethod
+    def len(value):
+        if value is None:
+            return None
+
+        return len(value)
+
+    @staticmethod
+    def type(value):
+        if value is None:
+            return None
+
+        return type(value)
+
+    @staticmethod
+    def round(value):
+        if value is None:
+            return None
+
+        return round(value)
+
+    @staticmethod
+    def floor(value):
+        if value is None:
+            return None
+
+        return floor(value)
+
+    @staticmethod
+    def ceil(value):
+        if value is None:
+            return None
+
+        return ceil(value)
+        
 
 _builtin_functions = BuiltinFunctions()
 

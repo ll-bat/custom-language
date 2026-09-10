@@ -145,7 +145,7 @@
       "patterns": [
         {
           "name": "support.function.builtin.dy",
-          "match": "\\b(?:print|max)(?=\\s*\\()"
+          "match": "\\b(?:print|max|min|abs|sin|cos|tan|sqrt|len|type|round|floor|ceil)(?=\\s*\\()"
         }
       ]
     },

@@ -12,10 +12,10 @@ PROGRAM Part10
     }
 
 
-    VAR x: int;
+    var x: int;
 
     for i = 0; i < 10; i = i + 1 {
-        VAR y: int = fib(i);
+        var y: int = fib(i);
         // print(y);
         x = max(x, y);
     }

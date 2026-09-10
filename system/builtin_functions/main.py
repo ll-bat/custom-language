@@ -8,6 +8,15 @@ class BuiltinFunctions:
     def print(*items):
         print(*items)
 
+    @staticmethod
+    def max(left, right):
+        if left is None:
+            return right
+        elif right is None:
+            return left
+            
+        return max(left, right)
+
 
 _builtin_functions = BuiltinFunctions()
 

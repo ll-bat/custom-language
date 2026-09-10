@@ -12,8 +12,13 @@ PROGRAM Part10
     }
 
 
+    VAR x: int;
+
     for i = 0; i < 10; i = i + 1 {
-        print(fib(i));
+        VAR y: int = fib(i);
+        // print(y);
+        x = max(x, y);
     }
 
+    print(x);
 }

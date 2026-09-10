@@ -43,7 +43,7 @@ class Dy:
     @staticmethod
     def read_file(path: str):
         # provided path should not include extension
-        path = "{}.dy".format(path)
+        path = "{}.dy".format(path) if not path.endswith('.dy') else path
         if not path.startswith('src/'):
             path = 'src/{}'.format(path)
 

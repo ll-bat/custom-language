@@ -1,3 +1,3 @@
 from compiler.main import Dy
 
-Dy.compile_file('app')
+Dy.compile_file('app.dy')

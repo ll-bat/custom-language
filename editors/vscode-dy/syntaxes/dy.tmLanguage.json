@@ -1,0 +1,205 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Dy",
+  "scopeName": "source.dy",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#function-declarations"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#types"
+    },
+    {
+      "include": "#constants"
+    },
+    {
+      "include": "#builtins"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#punctuation"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.dy",
+          "begin": "//",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.dy"
+            }
+          },
+          "end": "$"
+        },
+        {
+          "name": "comment.block.dy",
+          "begin": "\\{\\{",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.begin.dy"
+            }
+          },
+          "end": "\\}\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.end.dy"
+            }
+          }
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.dy",
+          "begin": "\"",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.dy"
+            }
+          },
+          "end": "\"",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.dy"
+            }
+          }
+        },
+        {
+          "name": "string.quoted.single.dy",
+          "begin": "'",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.dy"
+            }
+          },
+          "end": "'",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.dy"
+            }
+          }
+        }
+      ]
+    },
+    "function-declarations": {
+      "patterns": [
+        {
+          "match": "(?i)\\b(function)(\\s+)([A-Za-z][A-Za-z0-9]*)",
+          "captures": {
+            "1": {
+              "name": "storage.type.function.dy"
+            },
+            "3": {
+              "name": "entity.name.function.dy"
+            }
+          }
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.dy",
+          "match": "(?i)\\b(?:PROGRAM|BEGIN|END|return|if|elif|else|for|break)\\b"
+        },
+        {
+          "name": "storage.modifier.dy",
+          "match": "(?i)\\b(?:var|procedure)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.dy",
+          "match": "(?i)\\b(?:integer|int|real|float|string|str|boolean|object)\\b"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.dy",
+          "match": "(?i)\\b(?:true|false)\\b"
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.dy",
+          "match": "\\b(?:print|max)(?=\\s*\\()"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.dy",
+          "match": "(?<![A-Za-z0-9])(?:\\d+\\.\\d+|\\d+)(?![A-Za-z0-9])"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.logical.dy",
+          "match": "(?i)\\b(?:and|or)\\b|!"
+        },
+        {
+          "name": "keyword.operator.comparison.dy",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.assignment.dy",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.arithmetic.dy",
+          "match": "(?i)\\bdiv\\b|[+\\-*/]"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.section.block.begin.dy",
+          "match": "\\{"
+        },
+        {
+          "name": "punctuation.section.block.end.dy",
+          "match": "\\}"
+        },
+        {
+          "name": "punctuation.section.group.begin.dy",
+          "match": "\\("
+        },
+        {
+          "name": "punctuation.section.group.end.dy",
+          "match": "\\)"
+        },
+        {
+          "name": "punctuation.separator.dy",
+          "match": "[,;:]"
+        }
+      ]
+    }
+  }
+}

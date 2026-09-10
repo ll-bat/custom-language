@@ -1,0 +1,36 @@
+{
+  "name": "dy-language",
+  "displayName": "Dy Language Support",
+  "description": "Syntax highlighting and basic editing support for the Dy programming language.",
+  "version": "0.1.0",
+  "publisher": "dy-language",
+  "license": "MIT",
+  "engines": {
+    "vscode": ">=1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "dy",
+        "aliases": [
+          "Dy",
+          "dy"
+        ],
+        "extensions": [
+          ".dy"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "dy",
+        "scopeName": "source.dy",
+        "path": "./syntaxes/dy.tmLanguage.json"
+      }
+    ]
+  }
+}

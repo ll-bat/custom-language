@@ -19,8 +19,8 @@ class Parser:
     base_type: INTEGER | REAL | STRING | BOOLEAN | OBJECT
     compound_statement: statement_list
     statement_list: statement (SEMI statement)*
-    statement: assignment_statement
-        | function_call | return | declarations | if_statement | for_loop
+    statement: declarations | assignment_statement | function_call | return 
+        | if_statement | for_loop
         | empty | BREAK
     function_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT SEMI
     empty:

@@ -20,8 +20,9 @@ class Parser:
     compound_statement: statement_list
     statement_list: statement (SEMI statement)*
     statement: declarations | assignment_statement | function_call | return 
-        | if_statement | for_loop
+        | if_statement | for_loop | while_loop
         | empty | BREAK
+    while_loop: WHILE bool_expr block
     function_call: ID LPARENT (base_expr (COMMA base_expr)*)* RPARENT SEMI
     empty:
     return: RETURN base_expr
@@ -239,6 +240,9 @@ class Parser:
     def is_for_loop(self):
         return self.next_tokens_are(FOR)
 
+    def is_while_loop(self):
+        return self.next_tokens_are(WHILE)
+
     def is_break(self):
         return self.next_tokens_are(BREAK)
 
@@ -252,7 +256,8 @@ class Parser:
                or self.is_if_statement() \
                or self.is_for_loop() \
                or self.is_break() \
-                or self.is_return_stat()
+               or self.is_return_stat() \
+               or self.is_while_loop()
 
     def statement_list(self):
         children = []
@@ -290,11 +295,11 @@ class Parser:
             # variable or function declaration
             return self.declarations()
         elif self.is_if_statement():
-            #
             return self.if_statement()
         elif self.is_for_loop():
-            #
             return self.for_loop()
+        elif self.is_while_loop():
+            return self.while_loop()
         elif self.is_break():
             self.match(BREAK)
             self.match(SEMI)
@@ -317,6 +322,12 @@ class Parser:
         then = self.assignment_statement()
         block = self.block()
         return ForLoop(base, bool_expr, then, block)
+
+    def while_loop(self):
+        self.match(WHILE)
+        bool_expr = self.bool_expr()
+        block  = self.block()
+        return WhileLoop(bool_expr, block)
 
     def if_statement(self):
         self.match(IF)

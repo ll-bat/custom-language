@@ -25,4 +25,15 @@ PROGRAM Part10
         }
         return cba;
     }
+
+    var a: int = 1;
+    var b: int = 5;
+
+    while (a <= b) {
+        print(a);
+        if a >= 3 {
+            break;
+        }
+        a = a + 1;
+    }
 }

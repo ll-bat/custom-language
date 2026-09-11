@@ -180,6 +180,10 @@ class SemanticAnalyzer(NodeVisitor):
         self.visit(node.bool_expr)
         self.visit(node.then)
         self.visit(node.block)
+    
+    def visit_WhileLoop(self, node: WhileLoop):
+        self.visit(node.bool_expr)
+        self.visit(node.block)
 
     def visit_Break(self, node):
         pass

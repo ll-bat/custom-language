@@ -99,6 +99,10 @@ class BuiltinFunctions:
             return None
 
         return ceil(value)
+
+    @staticmethod
+    def str(value):
+        return str(value)
         
 
 _builtin_functions = BuiltinFunctions()

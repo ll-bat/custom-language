@@ -328,6 +328,14 @@ class ForLoop(AST):
     def __str__(self):
         return f'ForLoop({self.base}, {self.bool_expr}, {self.then}, {self.block})'
 
+class WhileLoop(AST):
+    def __init__(self, bool_expr, block: Block):
+        self.bool_expr = bool_expr
+        self.block = block
+
+    def __str__(self):
+        return f'WhileLoop({self.bool_expr}, {self.block})'
+
 
 class Break(AST):
     def __init__(self):

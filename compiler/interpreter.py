@@ -249,12 +249,16 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
 
     def visit_Break(self, node: Break):
         if len(self.call_stack) < 1:
-            self.error("Break is used outside of for-loop (0 len)")
+            self.error("Break is used outside of for-loop or while-loop (0 len)")
         last_node = self.call_stack[-1]
-        if last_node is not FOR:
-            self.error("Break is used outside of for-loop")
+        if last_node not in (FOR, WHILE):
+            self.error("Break is used outside of for-loop or while-loop")
         self.terminated_call_stack.append(BREAK)
         return None
+
+    def too_much_call_check(self, counter):
+        if counter + 1 > MAX_INT:
+            self.error("too much calls from while")
 
     def visit_ForLoop(self, node: ForLoop):
         def before_for_loop():
@@ -290,16 +294,12 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
                 if last_node is not FOR:
                     self.error("Something illegal happened in ForLoop")
 
-            def too_much_call_check(counter):
-                if counter + 1 > MAX_INT:
-                    self.error("too much calls from while")
-
             cnt = 0
             before_loop()
             while can_loop():
                 loop()
                 cnt += 1
-                too_much_call_check(cnt)
+                self.too_much_call_check(cnt)
 
             after_loop()
 
@@ -311,6 +311,30 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
         after_for_loop()
 
         return None
+
+    def visit_WhileLoop(self, node: WhileLoop):
+        self.define_new_scope()
+        self.call_stack.append(WHILE)
+
+        def can_loop():
+            if len(self.terminated_call_stack) > 0:
+                if self.terminated_call_stack[-1] == BREAK:
+                    # this means "break" is used inside for-loop
+                    self.terminated_call_stack.pop()
+                return False
+
+            return self.visit(node.bool_expr) is TRUE
+
+        counter = 0
+        while can_loop():
+            self.visit(node.block)
+            counter += 1
+
+        last_node =  self.call_stack.pop()
+        if last_node is not WHILE:
+            self.error("Something illegal happened in WhileLoop")
+
+        self.destroy_current_scope()
 
     @staticmethod
     def visit_NoneType(node):

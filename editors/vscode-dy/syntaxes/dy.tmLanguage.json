@@ -13,6 +13,9 @@
       "include": "#function-declarations"
     },
     {
+      "include": "#builtins"
+    },
+    {
       "include": "#keywords"
     },
     {
@@ -20,9 +23,6 @@
     },
     {
       "include": "#constants"
-    },
-    {
-      "include": "#builtins"
     },
     {
       "include": "#numbers"
@@ -117,7 +117,7 @@
       "patterns": [
         {
           "name": "keyword.control.dy",
-          "match": "(?i)\\b(?:PROGRAM|BEGIN|END|return|if|elif|else|for|break)\\b"
+          "match": "(?i)\\b(?:PROGRAM|BEGIN|END|return|if|elif|else|for|while|break)\\b"
         },
         {
           "name": "storage.modifier.dy",
@@ -145,7 +145,7 @@
       "patterns": [
         {
           "name": "support.function.builtin.dy",
-          "match": "\\b(?:print|max|min|abs|sin|cos|tan|sqrt|len|type|round|floor|ceil)(?=\\s*\\()"
+          "match": "\\b(?:print|max|min|abs|sin|cos|tan|sqrt|len|type|round|floor|ceil|str)(?=\\s*\\()"
         }
       ]
     },

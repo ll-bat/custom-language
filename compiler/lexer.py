@@ -137,7 +137,7 @@ class Lexer(object):
 
     def _id(self):
         result = ""
-        while self.get_current_character() is not None and self.get_current_character().isalnum():
+        while self.get_current_character() is not None and self.get_current_character().isalnum() or self.get_current_character() == '_':
             result += self.get_current_character()
             self.advance()
 

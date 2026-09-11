@@ -101,7 +101,7 @@ class BuiltinFunctions:
         return ceil(value)
 
     @staticmethod
-    def str(value):
+    def to_string(value):
         return str(value)
         
 

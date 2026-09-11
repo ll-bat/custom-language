@@ -136,7 +136,7 @@ class Interpreter(BeforeNodeVisitor, NestedScopeable):
         self.symbol_table.define(node)
 
     def visit_FunctionCall(self, node: FunctionCall):
-        if self.symbol_table.is_defined(node.name) is False:
+        if not self.symbol_table.is_defined(node.name):
             # system function call
             if is_system_function(node.name):
                 params = [self.visit(param) for param in node.actual_params]
